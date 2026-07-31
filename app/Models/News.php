@@ -1,0 +1,56 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class News extends Model
+{
+    protected $fillable = [
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'image',
+        'category',
+        'status',
+        'author_id',
+        'allow_comment',
+        'show_author',
+        'show_date',
+        'last_modified_by',
+        'published_at',
+    ];
+
+    /**
+     * Relasi ke penulis berita.
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /**
+     * Relasi ke kategori berita.
+     * Kolom news.category menyimpan slug kategori.
+     */
+    public function newsCategory(): BelongsTo
+    {
+        return $this->belongsTo(
+            NewsCategory::class,
+            'category',
+            'slug'
+        );
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'allow_comment' => 'boolean',
+            'show_author' => 'boolean',
+            'show_date' => 'boolean',
+            'published_at' => 'datetime',
+        ];
+    }
+}
