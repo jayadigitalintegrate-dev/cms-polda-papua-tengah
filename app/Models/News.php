@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class News extends Model
 {
@@ -42,6 +43,15 @@ class News extends Model
             'category',
             'slug'
         );
+    }
+
+    /**
+     * Relasi ke galeri foto berita.
+     */
+    public function images(): HasMany
+    {
+        return $this->hasMany(NewsImage::class)
+            ->orderBy('sort_order');
     }
 
     protected function casts(): array

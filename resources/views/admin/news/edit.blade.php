@@ -34,7 +34,10 @@
 
             <div class="bg-white shadow rounded-lg p-6">
 
-                <form method="POST" action="{{ route('news.store') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('news.update', $news) }}" enctype="multipart/form-data">
+
+                    @csrf
+                    @method('PUT')
 
                     @csrf
 
@@ -45,7 +48,7 @@
                             Judul Berita
                         </label>
 
-                        <input type="text" name="title" value="{{ old('title') }}"
+                        <input type="text" name="title" value="{{ old('title', $news->title) }}"
                             class="w-full rounded-lg border-gray-300">
 
                         @error('title')
@@ -72,7 +75,10 @@
 
                             @foreach($categories as $category)
 
-                                <option value="{{ $category->slug }}" @selected(old('category') == $category->slug)>
+                                <option value="{{ $category->slug }}" @selected(
+                                    old('category', $news->category)
+                                    == $category->slug
+                                )>
 
                                     {{ $category->name }}
 
@@ -127,12 +133,45 @@
                         <p class="text-sm text-gray-500 mt-2">
                             Pilih maksimal 5 foto kegiatan.
                         </p>
+                        @if($news->images->count())
 
+                            <div class="mb-6">
+
+                                <label class="block font-semibold mb-3">
+                                    Galeri Saat Ini
+                                </label>
+
+                                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+
+                                    @foreach($news->images as $photo)
+
+                                        <img src="{{ asset('storage/' . $photo->image) }}"
+                                            class="rounded-lg border shadow h-32 w-full object-cover">
+
+                                    @endforeach
+
+                                </div>
+
+                            </div>
+
+                        @endif
                         <div id="galleryPreview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4">
                         </div>
 
                     </div>
+                    @if ($news->image)
 
+                        <div class="mb-6">
+
+                            <label class="block font-semibold mb-2">
+                                Cover Saat Ini
+                            </label>
+
+                            <img src="{{ asset('storage/' . $news->image) }}" class="rounded-lg border shadow max-h-80">
+
+                        </div>
+
+                    @endif
 
                     {{-- Preview Cover --}}
                     <div id="previewContainer" class="hidden mb-6">
@@ -150,7 +189,7 @@
                         </label>
 
                         <textarea name="excerpt" rows="3"
-                            class="w-full rounded-lg border-gray-300">{{ old('excerpt') }}</textarea>
+                            class="w-full rounded-lg border-gray-300">{{ old('excerpt', $news->excerpt) }}</textarea>
 
                     </div>
 
@@ -163,7 +202,7 @@
                         </label>
 
                         <textarea id="content" name="content" rows="12"
-                            class="w-full rounded-lg border-gray-300">{{ old('content') }}</textarea>
+                            class="w-full rounded-lg border-gray-300">{{ old('content', $news->content) }}</textarea>
 
                         @error('content')
                             <div class="text-red-600 text-sm mt-1">
@@ -190,14 +229,14 @@
                         <button type="submit" name="action" value="draft"
                             class="px-5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white transition">
 
-                            Simpan Draft
+                            Update Draft
 
                         </button>
 
                         <button type="submit" name="action" value="publish"
                             class="px-5 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white transition">
 
-                            Publish Berita
+                            Update & Publish
 
                         </button>
 
@@ -212,70 +251,70 @@
     </div>
 
 
-   <script>
+    <script>
 
-document.getElementById('image').addEventListener('change', function (e) {
+        document.getElementById('image').addEventListener('change', function (e) {
 
-    const file = e.target.files[0];
+            const file = e.target.files[0];
 
-    if (!file) return;
+            if (!file) return;
 
-    const reader = new FileReader();
+            const reader = new FileReader();
 
-    reader.onload = function (ev) {
+            reader.onload = function (ev) {
 
-        document.getElementById('previewImage').src = ev.target.result;
+                document.getElementById('previewImage').src = ev.target.result;
 
-        document.getElementById('previewContainer').classList.remove('hidden');
+                document.getElementById('previewContainer').classList.remove('hidden');
 
-    };
+            };
 
-    reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
 
-});
+        });
 
 
-document.getElementById('gallery').addEventListener('change', function (e) {
+        document.getElementById('gallery').addEventListener('change', function (e) {
 
-    const preview = document.getElementById('galleryPreview');
+            const preview = document.getElementById('galleryPreview');
 
-    preview.innerHTML = '';
+            preview.innerHTML = '';
 
-    const files = Array.from(e.target.files);
+            const files = Array.from(e.target.files);
 
-    if (files.length > 5) {
+            if (files.length > 5) {
 
-        alert('Maksimal 5 foto yang dapat diunggah.');
+                alert('Maksimal 5 foto yang dapat diunggah.');
 
-        e.target.value = '';
+                e.target.value = '';
 
-        return;
+                return;
 
-    }
+            }
 
-    files.forEach(function(file) {
+            files.forEach(function (file) {
 
-        const reader = new FileReader();
+                const reader = new FileReader();
 
-        reader.onload = function (event) {
+                reader.onload = function (event) {
 
-            const img = document.createElement('img');
+                    const img = document.createElement('img');
 
-            img.src = event.target.result;
+                    img.src = event.target.result;
 
-            img.className = 'w-full h-32 object-cover rounded-lg border shadow';
+                    img.className = 'w-full h-32 object-cover rounded-lg border shadow';
 
-            preview.appendChild(img);
+                    preview.appendChild(img);
 
-        };
+                };
 
-        reader.readAsDataURL(file);
+                reader.readAsDataURL(file);
 
-    });
+            });
 
-});
+        });
 
-</script>
+    </script>
 
 
 </x-app-layout>
