@@ -30,79 +30,92 @@ class NewsController extends Controller
     }
 
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => ['required', 'string', 'max:255'],
-        'excerpt' => ['nullable', 'string'],
-        'content' => ['required', 'string'],
-        'category' => ['required', 'exists:news_categories,slug'],
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'excerpt' => ['nullable', 'string'],
+            'content' => ['required', 'string'],
+            'category' => ['required', 'exists:news_categories,slug'],
 
-        'image' => [
-            'nullable',
-            'image',
-            'mimes:webp,png',
-            'max:5120',
-        ],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:webp,png,jpg,jpeg',
+                'max:5120',
+            ],
 
-        'gallery' => [
-            'nullable',
-            'array',
-            'max:5',
-        ],
+            'gallery' => [
+                'nullable',
+                'array',
+                'max:5',
+            ],
 
-        'gallery.*' => [
-            'image',
-            'mimes:webp,png,jpg,jpeg',
-            'max:5120',
-        ],
-    ]);
+            'gallery.*' => [
+                'image',
+                'mimes:webp,png,jpg,jpeg',
+                'max:5120',
+            ],
 
-    DB::transaction(function () use ($request, $validated) {
-
-        $cover = null;
-
-        if ($request->hasFile('image')) {
-            $cover = $request->file('image')->store('news', 'public');
-        }
-
-        $status = $request->input('action') === 'publish'
-            ? 'publish'
-            : 'draft';
-
-        $news = News::create([
-            'title' => $validated['title'],
-            'slug' => Str::slug($validated['title']),
-            'excerpt' => $validated['excerpt'] ?? null,
-            'content' => $validated['content'],
-            'category' => $validated['category'],
-            'image' => $cover,
-            'status' => $status,
-            'published_at' => $status === 'publish' ? now() : null,
-            'author_id' => auth()->id(),
-            'last_modified_by' => auth()->user()->name,
+            'document' => [
+                'nullable',
+                'file',
+                'mimes:pdf',
+                'max:10240',
+            ],
         ]);
 
-        if ($request->hasFile('gallery')) {
+        DB::transaction(function () use ($request, $validated) {
 
-            foreach ($request->file('gallery') as $index => $photo) {
+            $cover = null;
+            $documentPath = null;
+            $documentName = null;
 
-                $path = $photo->store('news/gallery', 'public');
-
-                NewsImage::create([
-                    'news_id' => $news->id,
-                    'image' => $path,
-                    'caption' => null,
-                    'sort_order' => $index + 1,
-                ]);
+            if ($request->hasFile('image')) {
+                $cover = $request->file('image')->store('news', 'public');
             }
-        }
 
-    });
+            if ($request->hasFile('document')) {
+                $documentPath = $request->file('document')->store('news/documents', 'public');
+                $documentName = $request->file('document')->getClientOriginalName();
+            }
+            $status = $request->input('action') === 'publish'
+                ? 'published'
+                : 'draft';
+            $news = News::create([
+                'title' => $validated['title'],
+                'slug' => Str::slug($validated['title']),
+                'excerpt' => $validated['excerpt'] ?? null,
+                'content' => $validated['content'],
+                'category' => $validated['category'],
+                'image' => $cover,
+                'document' => $documentPath,
+                'document_name' => $documentName,
+                'status' => $status,
+                'published_at' => $status === 'published' ? now() : null,
+                'author_id' => auth()->id(),
+                'last_modified_by' => auth()->user()->name,
+            ]);
+            if ($request->hasFile('gallery')) {
 
-    return redirect()
-        ->route('news.index')
-        ->with('success', 'Berita berhasil disimpan.');
-}
+                foreach ($request->file('gallery') as $index => $photo) {
+
+                    $path = $photo->store('news/gallery', 'public');
+
+                    NewsImage::create([
+                        'news_id' => $news->id,
+                        'image' => $path,
+                        'caption' => null,
+                        'sort_order' => $index + 1,
+                    ]);
+                }
+            }
+
+        });
+
+        return redirect()
+            ->route('news.index')
+            ->with('success', 'Berita berhasil disimpan.');
+    }
 
     public function show(News $news)
     {
@@ -120,11 +133,58 @@ class NewsController extends Controller
 
     public function update(Request $request, News $news)
     {
-        return back()->with('success', 'Update sementara berhasil.');
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'category' => 'required|exists:news_categories,slug',
+            'excerpt' => 'nullable|string',
+            'content' => 'required|string',
+            'status' => 'nullable|in:draft,published',
+            'image' => 'nullable|image|mimes:webp,png,jpg,jpeg|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+
+            if ($news->image && Storage::disk('public')->exists($news->image)) {
+                Storage::disk('public')->delete($news->image);
+            }
+
+            $validated['image'] = $request->file('image')
+                ->store('news', 'public');
+        }
+
+        $validated['slug'] = Str::slug($request->title);
+
+        $status = $request->input('action') === 'publish'
+            ? 'published'
+            : ($request->status ?? $news->status);
+
+        $validated['status'] = $status;
+
+        $validated['published_at'] =
+            $status === 'published'
+            ? now()
+            : null;
+        $validated['last_modified_by'] = auth()->user()->name;
+
+        $news->update($validated);
+
+        return redirect()
+            ->route('news.index')
+            ->with('success', 'Berita berhasil diperbarui.');
     }
+
 
     public function destroy(News $news)
     {
-        return back()->with('success', 'Delete sementara berhasil.');
+        if ($news->image && Storage::disk('public')->exists($news->image)) {
+            Storage::disk('public')->delete($news->image);
+        }
+
+        $news->delete();
+
+        return redirect()
+            ->route('news.index')
+            ->with('success', 'Berita berhasil dihapus.');
     }
+
 }

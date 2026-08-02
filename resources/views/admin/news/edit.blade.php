@@ -219,12 +219,12 @@
                     {{-- Tombol --}}
                     <div class="flex justify-end gap-3">
 
-                        <button type="reset"
+                        <a href="{{ route('news.index') }}"
                             class="px-5 py-2 rounded-lg bg-gray-500 hover:bg-gray-600 text-white transition">
 
                             Batal
 
-                        </button>
+                        </a>
 
                         <button type="submit" name="action" value="draft"
                             class="px-5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white transition">
@@ -241,7 +241,6 @@
                         </button>
 
                     </div>
-
                 </form>
 
             </div>
@@ -318,3 +317,4 @@
 
 
 </x-app-layout>
+

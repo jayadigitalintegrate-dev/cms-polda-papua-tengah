@@ -14,18 +14,12 @@
             </div>
 
             <a href="{{ route('news.create') }}"
-               class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white shadow hover:bg-green-700 transition">
+                class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white shadow hover:bg-green-700 transition">
 
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     class="w-5 h-5"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
 
-                    <path stroke-linecap="round"
-                          stroke-linejoin="round"
-                          stroke-width="2"
-                          d="M12 4v16m8-8H4"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 
                 </svg>
 
@@ -71,7 +65,7 @@
                     </div>
 
                     <a href="{{ route('news.create') }}"
-                       class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
+                        class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
 
                         Tambah Berita
 
@@ -102,6 +96,10 @@
                                         Status
                                     </th>
 
+                                    <th class="px-6 py-3 text-left">
+                                        Tanggal
+                                    </th>
+
                                     <th class="px-6 py-3 text-center">
                                         Aksi
                                     </th>
@@ -112,67 +110,84 @@
 
                             <tbody>
 
-                                @foreach($news as $item)
+                              @foreach($news as $item)
 
-                                    <tr class="border-b">
+    <tr class="border-b">
 
-                                        <td class="px-6 py-4">
+        <td class="px-6 py-4">
 
-                                            <div class="font-semibold">
+            <div class="font-semibold">
 
-                                                {{ $item->title }}
+                {{ $item->title }}
 
-                                            </div>
+            </div>
 
-                                        </td>
+        </td>
 
-                                        <td class="px-6 py-4">
 
-                                            {{ $item->category }}
+        <td class="px-6 py-4 text-sm text-gray-600">
 
-                                        </td>
+            {{ $item->category }}
 
-                                        <td class="px-6 py-4">
+        </td>
 
-                                            <span class="rounded bg-gray-100 px-3 py-1 text-sm">
 
-                                                {{ ucfirst($item->status) }}
+        <td class="px-6 py-4">
 
-                                            </span>
+            <span class="rounded bg-gray-100 px-3 py-1 text-sm">
 
-                                        </td>
+                {{ ucfirst($item->status) }}
 
-                                        <td class="px-6 py-4 text-center">
+            </span>
 
-                                            <a href="{{ route('news.edit',$item) }}"
-                                               class="mr-3 text-blue-600 hover:underline">
+        </td>
 
-                                                Edit
 
-                                            </a>
+        <td class="px-6 py-4 text-sm text-gray-600">
 
-                                            <form method="POST"
-                                                  action="{{ route('news.destroy',$item) }}"
-                                                  class="inline">
+            @if($item->published_at)
 
-                                                @csrf
-                                                @method('DELETE')
+                {{ $item->published_at->format('d F Y, H:i') }}
 
-                                                <button
-                                                    onclick="return confirm('Yakin ingin menghapus berita ini?')"
-                                                    class="text-red-600 hover:underline">
+            @else
 
-                                                    Hapus
+                {{ $item->created_at->format('d F Y, H:i') }}
 
-                                                </button>
+            @endif
 
-                                            </form>
+        </td>
 
-                                        </td>
 
-                                    </tr>
+        <td class="px-6 py-4 text-center">
 
-                                @endforeach
+            <a href="{{ route('news.edit', $item) }}"
+                class="mr-3 text-blue-600 hover:underline">
+
+                Edit
+
+            </a>
+
+            <form method="POST"
+                action="{{ route('news.destroy', $item) }}"
+                class="inline">
+
+                @csrf
+                @method('DELETE')
+
+                <button onclick="return confirm('Yakin ingin menghapus berita ini?')"
+                    class="text-red-600 hover:underline">
+
+                    Hapus
+
+                </button>
+
+            </form>
+
+        </td>
+
+    </tr>
+
+@endforeach
 
                             </tbody>
 
@@ -190,35 +205,18 @@
 
                     <div class="py-16 text-center">
 
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             class="mx-auto h-16 w-16 text-gray-300"
-                             fill="none"
-                             viewBox="0 0 24 24"
-                             stroke="currentColor">
-
-                            <path stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="1.5"
-                                  d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h8l8 8v8a2 2 0 01-2 2z"/>
-
-                        </svg>
-
                         <h3 class="mt-4 text-xl font-semibold">
-
                             Belum Ada Berita
-
                         </h3>
 
                         <p class="mt-2 text-gray-500">
-
                             Silakan tambahkan berita pertama untuk Website Polda Papua Tengah.
-
                         </p>
 
                         <a href="{{ route('news.create') }}"
-                           class="mt-6 inline-flex items-center rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700">
+                            class="mt-6 inline-flex items-center rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700">
 
-                            ➕ Tambah Berita
+                            Tambah Berita
 
                         </a>
 

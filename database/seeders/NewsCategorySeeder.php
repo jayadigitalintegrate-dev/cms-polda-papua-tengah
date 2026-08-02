@@ -15,7 +15,7 @@ class NewsCategorySeeder extends Seeder
             'Berita Utama',
             'Berita',
             'Press Release',
-            'Pengumuman',
+            'Pengumuman Popup',
             'Himbauan',
             'Kegiatan',
             'Prestasi',
@@ -45,3 +45,4 @@ class NewsCategorySeeder extends Seeder
         }
     }
 }
+

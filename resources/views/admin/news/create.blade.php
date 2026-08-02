@@ -98,7 +98,27 @@
                             Cover Berita
                         </label>
 
-                        <input id="image" type="file" name="image" accept=".webp,.png" class="w-full">
+                        {{-- Cover Berita --}}
+                        <div class="mb-5">
+
+                            <label class="block font-semibold mb-2">
+                                Gambar Utama / Cover Berita
+                            </label>
+
+                            <input id="image" type="file" name="image" accept=".webp,.png,.jpg,.jpeg"
+                                class="w-full rounded-lg border-gray-300">
+
+                            <p class="text-sm text-gray-500 mt-2">
+                                Format: WEBP / PNG / JPG / JPEG. Maksimal 5MB.
+                            </p>
+
+                            @error('image')
+                                <div class="text-red-600 text-sm mt-1">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                        </div>
 
                         <p class="text-sm text-gray-500 mt-2">
                             Format: WEBP / PNG
@@ -107,6 +127,33 @@
                         </p>
 
                         @error('image')
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+                                        {{-- Dokumen PDF --}}
+                    <div id="documentContainer" class="mb-5 hidden">
+
+                        <label class="block font-semibold mb-2">
+                            Dokumen PDF
+                        </label>
+
+                        <input
+                            id="document"
+                            type="file"
+                            name="document"
+                            accept=".pdf,application/pdf"
+                            class="w-full rounded-lg border-gray-300"
+                        >
+
+                        <p class="text-sm text-gray-500 mt-2">
+                            Upload dokumen resmi dalam format PDF. Maksimal 10 MB.
+                        </p>
+
+                        @error('document')
                             <div class="text-red-600 text-sm mt-1">
                                 {{ $message }}
                             </div>
@@ -178,24 +225,27 @@
 
 
                     {{-- Tombol --}}
-                    <div class="flex justify-end gap-3">
+                    <div
+                        class="flex justify-end gap-3 mt-8 mb-4 relative z-50 bg-gray-100 p-5 rounded-lg border-2 border-gray-300">
 
-                        <button type="reset"
+                        <a href="{{ route('news.index') }}"
                             class="px-5 py-2 rounded-lg bg-gray-500 hover:bg-gray-600 text-white transition">
 
                             Batal
 
-                        </button>
+                        </a>
+
 
                         <button type="submit" name="action" value="draft"
-                            class="px-5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white transition">
+                            class="px-5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white font-semibold shadow-lg">
 
                             Simpan Draft
 
                         </button>
 
+
                         <button type="submit" name="action" value="publish"
-                            class="px-5 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white transition">
+                            class="px-5 py-2 rounded-lg bg-green-700 hover:bg-green-800 text-white font-semibold shadow-lg">
 
                             Publish Berita
 
@@ -210,72 +260,5 @@
         </div>
 
     </div>
-
-
-   <script>
-
-document.getElementById('image').addEventListener('change', function (e) {
-
-    const file = e.target.files[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = function (ev) {
-
-        document.getElementById('previewImage').src = ev.target.result;
-
-        document.getElementById('previewContainer').classList.remove('hidden');
-
-    };
-
-    reader.readAsDataURL(file);
-
-});
-
-
-document.getElementById('gallery').addEventListener('change', function (e) {
-
-    const preview = document.getElementById('galleryPreview');
-
-    preview.innerHTML = '';
-
-    const files = Array.from(e.target.files);
-
-    if (files.length > 5) {
-
-        alert('Maksimal 5 foto yang dapat diunggah.');
-
-        e.target.value = '';
-
-        return;
-
-    }
-
-    files.forEach(function(file) {
-
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-
-            const img = document.createElement('img');
-
-            img.src = event.target.result;
-
-            img.className = 'w-full h-32 object-cover rounded-lg border shadow';
-
-            preview.appendChild(img);
-
-        };
-
-        reader.readAsDataURL(file);
-
-    });
-
-});
-
-</script>
-
 
 </x-app-layout>

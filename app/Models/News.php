@@ -9,20 +9,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class News extends Model
 {
     protected $fillable = [
-        'title',
-        'slug',
-        'excerpt',
-        'content',
-        'image',
-        'category',
-        'status',
-        'author_id',
-        'allow_comment',
-        'show_author',
-        'show_date',
-        'last_modified_by',
-        'published_at',
-    ];
+    'title',
+    'slug',
+    'excerpt',
+    'content',
+    'image',
+    'document',
+    'document_name',
+    'category',
+    'status',
+    'author_id',
+    'allow_comment',
+    'show_author',
+    'show_date',
+    'last_modified_by',
+    'published_at',
+];
 
     /**
      * Relasi ke penulis berita.
