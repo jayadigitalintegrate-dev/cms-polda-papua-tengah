@@ -1,8 +1,8 @@
 <?php
-
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\PPIDRequestController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,6 +16,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('news', NewsController::class);
 
+    Route::resource('complaints', ComplaintController::class)->only(['index', 'show']);
+    Route::resource('ppid-requests', PPIDRequestController::class)
+        ->only(['index', 'show', 'update']);
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -27,4 +30,6 @@ Route::middleware('auth')->group(function () {
 
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
+
+
