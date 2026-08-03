@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\News;
 use App\Models\NewsCategory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class NewsController extends Controller
 {
@@ -34,7 +35,17 @@ class NewsController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'excerpt' => ['nullable', 'string'],
-            'content' => ['required', 'string'],
+            'content' => [
+                'nullable',
+                'string',
+                Rule::requiredIf(
+                    fn () => !in_array(
+                        $request->input('category'),
+                        ['pengumuman-popup', 'pengumuman', 'ppid'],
+                        true
+                    )
+                ),
+            ],
             'category' => ['required', 'exists:news_categories,slug'],
 
             'image' => [
@@ -137,7 +148,17 @@ class NewsController extends Controller
             'title' => 'required|string|max:255',
             'category' => 'required|exists:news_categories,slug',
             'excerpt' => 'nullable|string',
-            'content' => 'required|string',
+            'content' => [
+            'nullable',
+            'string',
+            Rule::requiredIf(
+                fn () => !in_array(
+                    $request->input('category'),
+                    ['pengumuman-popup', 'pengumuman', 'ppid'],
+                    true
+                )
+            ),
+        ],
             'status' => 'nullable|in:draft,published',
             'image' => 'nullable|image|mimes:webp,png,jpg,jpeg|max:5120',
         ]);
