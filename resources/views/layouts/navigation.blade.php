@@ -13,22 +13,49 @@
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
 
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{-- Dashboard --}}
+                    <x-nav-link
+                        :href="route('dashboard')"
+                        :active="request()->routeIs('dashboard')"
+                    >
                         Dashboard
                     </x-nav-link>
 
-                    <x-nav-link :href="route('news.index')" :active="request()->routeIs('news.*')">
+                    {{-- Berita --}}
+                    <x-nav-link
+                        :href="route('news.index')"
+                        :active="request()->routeIs('news.*')"
+                    >
                         Berita
                     </x-nav-link>
 
+                    {{-- Pengaduan --}}
+                    <x-nav-link
+                        :href="route('complaints.index')"
+                        :active="request()->routeIs('complaints.*')"
+                    >
+                        Pengaduan
+                    </x-nav-link>
+
+                    {{-- PPID --}}
+                    <x-nav-link
+                        :href="route('ppid-requests.index')"
+                        :active="request()->routeIs('ppid-requests.*')"
+                    >
+                        PPID
+                    </x-nav-link>
+
+                    {{-- Pengumuman --}}
                     <x-nav-link href="#">
                         Pengumuman
                     </x-nav-link>
 
+                    {{-- Galeri --}}
                     <x-nav-link href="#">
                         Galeri
                     </x-nav-link>
 
+                    {{-- Pejabat --}}
                     <x-nav-link href="#">
                         Pejabat
                     </x-nav-link>
@@ -71,11 +98,11 @@
 
                             @csrf
 
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-
+                            <x-dropdown-link
+                                :href="route('logout')"
+                                onclick="event.preventDefault(); this.closest('form').submit();"
+                            >
                                 Log Out
-
                             </x-dropdown-link>
 
                         </form>
@@ -89,14 +116,26 @@
 
             <div class="-me-2 flex items-center sm:hidden">
 
-                <button @click="open = ! open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400">
+                <button
+                    @click="open = ! open"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400"
+                >
 
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <svg
+                        class="h-6 w-6"
+                        stroke="currentColor"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
 
-                        <path :class="{'hidden': open, 'inline-flex': ! open}" class="inline-flex"
-                            stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path
+                            :class="{'hidden': open, 'inline-flex': ! open}"
+                            class="inline-flex"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16"
+                        />
 
                     </svg>
 

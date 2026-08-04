@@ -2,7 +2,7 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Tambah Berita
+            Edit Berita
         </h2>
     </x-slot>
 
@@ -39,7 +39,7 @@
                     @csrf
                     @method('PUT')
 
-                    @csrf
+
 
                     {{-- Judul --}}
                     <div class="mb-5">
@@ -104,10 +104,10 @@
                             Cover Berita
                         </label>
 
-                        <input id="image" type="file" name="image" accept=".webp,.png" class="w-full">
+                        <input id="image" type="file" name="image" accept=".webp,.png,.jpg,.jpeg" class="w-full">
 
                         <p class="text-sm text-gray-500 mt-2">
-                            Format: WEBP / PNG
+                            Format: WEBP / PNG / JPG / JPEG
                             <br>
                             Maksimal 5 MB
                         </p>
@@ -119,6 +119,55 @@
                         @enderror
 
                     </div>
+
+                    {{-- Dokumen PDF --}}
+                    <div id="documentContainer" class="mb-5">
+
+                        <label class="block font-semibold mb-2">
+                            Dokumen PDF
+                        </label>
+
+                        @if ($news->document)
+
+                            <div class="mb-3 p-4 rounded-lg border bg-gray-50">
+
+                                <div class="font-semibold text-gray-800">
+                                    Dokumen saat ini
+                                </div>
+
+                                <div class="text-sm text-gray-600 mt-1">
+                                    {{ $news->document_name ?? 'Dokumen PDF' }}
+                                </div>
+
+                                <a href="{{ asset('storage/' . $news->document) }}" target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="inline-block mt-3 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+                                    Lihat / Download PDF
+                                </a>
+
+                            </div>
+
+                        @endif
+
+                        <input id="document" type="file" name="document" accept=".pdf,application/pdf"
+                            class="w-full rounded-lg border-gray-300">
+
+                        <p class="text-sm text-gray-500 mt-2">
+                            Upload PDF baru jika ingin mengganti dokumen saat ini.
+                            Maksimal 10 MB.
+                        </p>
+
+                        @error('document')
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+
+
+
 
                     {{-- Galeri Kegiatan --}}
                     <div class="mb-5">
@@ -317,4 +366,3 @@
 
 
 </x-app-layout>
-

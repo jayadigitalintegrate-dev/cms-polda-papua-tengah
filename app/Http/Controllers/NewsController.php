@@ -8,6 +8,7 @@ use Illuminate\Support\Str;
 use App\Models\News;
 use App\Models\NewsCategory;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Validation\Rule;
 
 class NewsController extends Controller
@@ -141,58 +142,206 @@ class NewsController extends Controller
 
         return view('admin.news.edit', compact('news', 'categories'));
     }
+public function update(Request $request, News $news)
+{
+    $validated = $request->validate([
+        'title' => [
+            'required',
+            'string',
+            'max:255',
+        ],
 
-    public function update(Request $request, News $news)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|exists:news_categories,slug',
-            'excerpt' => 'nullable|string',
-            'content' => [
+        'category' => [
+            'required',
+            'exists:news_categories,slug',
+        ],
+
+        'excerpt' => [
+            'nullable',
+            'string',
+        ],
+
+        'content' => [
             'nullable',
             'string',
             Rule::requiredIf(
                 fn () => !in_array(
                     $request->input('category'),
-                    ['pengumuman-popup', 'pengumuman', 'ppid'],
+                    [
+                        'pengumuman-popup',
+                        'pengumuman',
+                        'ppid',
+                    ],
                     true
                 )
             ),
         ],
-            'status' => 'nullable|in:draft,published',
-            'image' => 'nullable|image|mimes:webp,png,jpg,jpeg|max:5120',
-        ]);
 
-        if ($request->hasFile('image')) {
+        'status' => [
+            'nullable',
+            'in:draft,published',
+        ],
 
-            if ($news->image && Storage::disk('public')->exists($news->image)) {
-                Storage::disk('public')->delete($news->image);
-            }
+        'image' => [
+            'nullable',
+            'image',
+            'mimes:webp,png,jpg,jpeg',
+            'max:5120',
+        ],
 
-            $validated['image'] = $request->file('image')
-                ->store('news', 'public');
+        'gallery' => [
+            'nullable',
+            'array',
+            'max:5',
+        ],
+
+        'gallery.*' => [
+            'image',
+            'mimes:webp,png,jpg,jpeg',
+            'max:5120',
+        ],
+
+        'document' => [
+            'nullable',
+            'file',
+            'mimes:pdf',
+            'max:10240',
+        ],
+    ]);
+
+    /*
+    |--------------------------------------------------------------------------
+    | COVER IMAGE
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->hasFile('image')) {
+
+        if (
+            $news->image &&
+            Storage::disk('public')->exists($news->image)
+        ) {
+            Storage::disk('public')->delete($news->image);
         }
 
-        $validated['slug'] = Str::slug($request->title);
+        $validated['image'] = $request
+            ->file('image')
+            ->store('news', 'public');
+    }
 
-        $status = $request->input('action') === 'publish'
-            ? 'published'
-            : ($request->status ?? $news->status);
+    /*
+    |--------------------------------------------------------------------------
+    | DOCUMENT PDF
+    |--------------------------------------------------------------------------
+    */
 
-        $validated['status'] = $status;
+    if ($request->hasFile('document')) {
 
-        $validated['published_at'] =
-            $status === 'published'
+        if (
+            $news->document &&
+            Storage::disk('public')->exists($news->document)
+        ) {
+            Storage::disk('public')->delete($news->document);
+        }
+
+        $validated['document'] = $request
+            ->file('document')
+            ->store('news/documents', 'public');
+
+        $validated['document_name'] = $request
+            ->file('document')
+            ->getClientOriginalName();
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | SLUG
+    |--------------------------------------------------------------------------
+    */
+
+    $validated['slug'] = Str::slug(
+        $request->input('title')
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS
+    |--------------------------------------------------------------------------
+    */
+
+    $status = $request->input('action') === 'publish'
+        ? 'published'
+        : (
+            $request->input('action') === 'draft'
+                ? 'draft'
+                : ($request->status ?? $news->status)
+        );
+
+    $validated['status'] = $status;
+
+    $validated['published_at'] =
+        $status === 'published'
             ? now()
             : null;
-        $validated['last_modified_by'] = auth()->user()->name;
 
-        $news->update($validated);
+    /*
+    |--------------------------------------------------------------------------
+    | LAST MODIFIED
+    |--------------------------------------------------------------------------
+    */
 
-        return redirect()
-            ->route('news.index')
-            ->with('success', 'Berita berhasil diperbarui.');
+    $validated['last_modified_by'] =
+        auth()->user()->name;
+
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE NEWS
+    |--------------------------------------------------------------------------
+    */
+
+    $news->update($validated);
+
+    /*
+    |--------------------------------------------------------------------------
+    | GALLERY
+    |--------------------------------------------------------------------------
+    */
+
+    if ($request->hasFile('gallery')) {
+
+        $currentGalleryCount = $news->images()->count();
+
+        foreach (
+            $request->file('gallery')
+            as $index => $photo
+        ) {
+
+            if ($currentGalleryCount >= 5) {
+                break;
+            }
+
+            $path = $photo->store(
+                'news/gallery',
+                'public'
+            );
+
+            NewsImage::create([
+                'news_id' => $news->id,
+                'image' => $path,
+                'caption' => null,
+                'sort_order' =>
+                    $currentGalleryCount + $index + 1,
+            ]);
+        }
     }
+
+    return redirect()
+        ->route('news.index')
+        ->with(
+            'success',
+            'Berita berhasil diperbarui.'
+        );
+}
 
 
     public function destroy(News $news)
@@ -207,5 +356,139 @@ class NewsController extends Controller
             ->route('news.index')
             ->with('success', 'Berita berhasil dihapus.');
     }
+
+    /**
+ * Bulk Delete Berita
+ */
+public function bulkDelete(Request $request)
+{
+    $validated = $request->validate([
+        'ids' => [
+            'required',
+            'array',
+            'min:1',
+        ],
+        'ids.*' => [
+            'integer',
+            'exists:news,id',
+        ],
+    ]);
+
+    $items = News::whereIn('id', $validated['ids'])->get();
+
+    foreach ($items as $item) {
+
+        if (
+            $item->image &&
+            Storage::disk('public')->exists($item->image)
+        ) {
+            Storage::disk('public')->delete($item->image);
+        }
+
+        if (
+            $item->document &&
+            Storage::disk('public')->exists($item->document)
+        ) {
+            Storage::disk('public')->delete($item->document);
+        }
+
+        foreach ($item->images as $image) {
+
+            if (
+                Storage::disk('public')->exists($image->image)
+            ) {
+                Storage::disk('public')->delete($image->image);
+            }
+
+            $image->delete();
+        }
+
+        $item->delete();
+    }
+
+    return redirect()
+        ->route('news.index')
+        ->with(
+            'success',
+            count($validated['ids']) .
+            ' berita berhasil dihapus.'
+        );
+}
+
+/**
+ * Bulk Publish
+ */
+public function bulkPublish(Request $request)
+{
+    $validated = $request->validate([
+        'ids' => [
+            'required',
+            'array',
+            'min:1',
+        ],
+        'ids.*' => [
+            'integer',
+            'exists:news,id',
+        ],
+    ]);
+
+    News::whereIn(
+        'id',
+        $validated['ids']
+    )->update([
+        'status' => 'published',
+        'published_at' => now(),
+        'last_modified_by' => auth()->user()->name,
+    ]);
+
+    return redirect()
+        ->route('news.index')
+        ->with(
+            'success',
+            count($validated['ids']) .
+            ' berita berhasil dipublish.'
+        );
+}
+
+/**
+ * Export PDF
+ */
+public function exportPdf(Request $request)
+{
+    $validated = $request->validate([
+        'ids' => [
+            'required',
+            'array',
+            'min:1',
+        ],
+        'ids.*' => [
+            'integer',
+            'exists:news,id',
+        ],
+    ]);
+
+    $news = News::whereIn(
+        'id',
+        $validated['ids']
+    )
+    ->latest()
+    ->get();
+
+    $pdf = Pdf::loadView(
+        'admin.news.pdf',
+        compact('news')
+    );
+
+    $pdf->setPaper(
+        'a4',
+        'portrait'
+    );
+
+    return $pdf->download(
+        'laporan-berita-' .
+        now()->format('YmdHis') .
+        '.pdf'
+    );
+}
 
 }
