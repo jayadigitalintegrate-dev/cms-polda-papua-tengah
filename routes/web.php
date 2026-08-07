@@ -3,6 +3,8 @@
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PPIDRequestController;
+use App\Http\Controllers\PpidCategoryController;
+use App\Http\Controllers\PpidDocumentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -72,6 +74,23 @@ Route::post(
     [PPIDRequestController::class, 'exportPdf']
 )->name('ppid-requests.export-pdf');
 
+Route::post(
+    'ppid-documents/bulk-delete',
+    [PpidDocumentController::class,'bulkDelete']
+)->name('ppid-documents.bulk-delete');
+
+Route::post(
+    'ppid-documents/bulk-publish',
+    [PpidDocumentController::class,'bulkPublish']
+)->name('ppid-documents.bulk-publish');
+
+Route::post(
+    'ppid-documents/bulk-draft',
+    [PpidDocumentController::class,'bulkDraft']
+)->name('ppid-documents.bulk-draft');
+
+
+
 // Daftar, detail, dan update permohonan PPID.
 Route::resource('ppid-requests', PPIDRequestController::class)
     ->only([
@@ -79,6 +98,28 @@ Route::resource('ppid-requests', PPIDRequestController::class)
         'show',
         'update',
     ]);
+
+    /*
+|--------------------------------------------------------------------------
+| PPID CATEGORIES
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'ppid-categories',
+    PpidCategoryController::class
+);
+
+/*
+|--------------------------------------------------------------------------
+| PPID DOCUMENTS
+|--------------------------------------------------------------------------
+*/
+
+Route::resource(
+    'ppid-documents',
+    PpidDocumentController::class
+);
 
     /*
     |--------------------------------------------------------------------------
