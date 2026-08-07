@@ -73,24 +73,6 @@ Route::post(
     '/ppid-requests/export-pdf',
     [PPIDRequestController::class, 'exportPdf']
 )->name('ppid-requests.export-pdf');
-
-Route::post(
-    'ppid-documents/bulk-delete',
-    [PpidDocumentController::class,'bulkDelete']
-)->name('ppid-documents.bulk-delete');
-
-Route::post(
-    'ppid-documents/bulk-publish',
-    [PpidDocumentController::class,'bulkPublish']
-)->name('ppid-documents.bulk-publish');
-
-Route::post(
-    'ppid-documents/bulk-draft',
-    [PpidDocumentController::class,'bulkDraft']
-)->name('ppid-documents.bulk-draft');
-
-
-
 // Daftar, detail, dan update permohonan PPID.
 Route::resource('ppid-requests', PPIDRequestController::class)
     ->only([
