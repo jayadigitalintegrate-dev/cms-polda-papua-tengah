@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+﻿<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <div class="flex justify-between h-16">
@@ -37,13 +37,50 @@
                         Pengaduan
                     </x-nav-link>
 
-                    {{-- PPID --}}
-                    <x-nav-link
-                        :href="route('ppid-requests.index')"
-                        :active="request()->routeIs('ppid-requests.*')"
-                    >
-                        PPID
-                    </x-nav-link>
+                    {{-- PPID DROPDOWN --}}
+                    <x-dropdown align="left" width="56">
+                        <x-slot name="trigger">
+                            <button
+                                class="inline-flex items-center self-stretch px-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
+                                {{ request()->routeIs('ppid-requests.*') || request()->routeIs('ppid-categories.*') || request()->routeIs('ppid-documents.*')
+                                    ? 'border-indigo-400 text-gray-900'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}"
+                            >
+                                <span>PPID</span>
+
+                                <svg
+                                    class="ms-1 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+
+                            <x-dropdown-link :href="route('ppid-requests.index')">
+                                Permohonan Informasi
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('ppid-categories.index')">
+                                Kategori PPID
+                            </x-dropdown-link>
+
+                            <x-dropdown-link :href="route('ppid-documents.index')">
+                                Dokumen PPID
+                            </x-dropdown-link>
+
+                        </x-slot>
+                    </x-dropdown>
 
                     {{-- Pengumuman --}}
                     <x-nav-link href="#">

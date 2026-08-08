@@ -98,6 +98,13 @@ Route::resource(
 |--------------------------------------------------------------------------
 */
 
+// Download Dokumen PPID
+Route::get(
+    '/ppid-documents/{ppid_document}/download',
+    [PpidDocumentController::class, 'download']
+)->name('ppid-documents.download');
+
+// CRUD
 Route::resource(
     'ppid-documents',
     PpidDocumentController::class

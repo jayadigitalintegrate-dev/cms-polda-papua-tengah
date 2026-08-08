@@ -441,7 +441,31 @@ class PpidDocumentController extends Controller
             'Dokumen PPID berhasil diperbarui.'
         );
 }
+/**
+ * Download dokumen PDF dan catat jumlah download.
+ */
+public function download(PpidDocument $ppidDocument)
+{
+    if (!$ppidDocument->document) {
+        abort(404, 'File PDF tidak tersedia.');
+    }
 
+    $disk = Storage::disk('public');
+
+    if (!$disk->exists($ppidDocument->document)) {
+        abort(404, 'File PDF tidak ditemukan.');
+    }
+
+    $ppidDocument->increment('download_count');
+
+    return $disk->download(
+        $ppidDocument->document,
+        $ppidDocument->document_name ?: basename($ppidDocument->document),
+        [
+            'Content-Type' => 'application/pdf',
+        ]
+    );
+}
 
 
 

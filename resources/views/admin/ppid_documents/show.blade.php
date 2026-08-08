@@ -195,7 +195,7 @@
 
                                         @if($ppidDocument->document)
 
-                                            <a href="{{ Storage::url($ppidDocument->document) }}" target="_blank"
+                                            <a href="{{ route('ppid-documents.download', $ppidDocument) }}"
                                                 class="inline-flex h-10 items-center rounded-md bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700">
 
                                                 Download PDF
@@ -221,75 +221,75 @@
                         </table>
 
                     </div>
-                <div class="border-t p-6">
+                    <div class="border-t p-6">
 
-                    <h4 class="mb-3 text-lg font-semibold text-gray-800">
+                        <h4 class="mb-3 text-lg font-semibold text-gray-800">
 
-                        Ringkasan
+                            Ringkasan
 
-                    </h4>
+                        </h4>
 
-                    <div class="rounded-lg bg-gray-50 p-4 text-gray-700">
+                        <div class="rounded-lg bg-gray-50 p-4 text-gray-700">
 
-                        {!! nl2br(e($ppidDocument->summary ?? '-')) !!}
-
-                    </div>
-
-                </div>
-
-                <div class="border-t p-6">
-
-                    <h4 class="mb-3 text-lg font-semibold text-gray-800">
-
-                        Isi Dokumen
-
-                    </h4>
-
-                    <div class="prose max-w-none">
-
-                        {!! $ppidDocument->content ?: '<p class="text-gray-400">Belum ada isi dokumen.</p>' !!}
-
-                    </div>
-
-                </div>
-
-                <div class="border-t bg-gray-50 px-6 py-5">
-
-                    <div class="flex items-center justify-between">
-
-                        <div class="text-sm text-gray-500">
-
-                            Dibuat:
-                            {{ optional($ppidDocument->created_at)->format('d M Y H:i') }}
-
-                            @if($ppidDocument->updated_at)
-
-                                <br>
-
-                                Diperbarui:
-                                {{ optional($ppidDocument->updated_at)->format('d M Y H:i') }}
-
-                            @endif
+                            {!! nl2br(e($ppidDocument->summary ?? '-')) !!}
 
                         </div>
 
-                        <div class="flex gap-2">
+                    </div>
 
-                            <a
-                                href="{{ route('ppid-documents.edit',$ppidDocument) }}"
-                                class="inline-flex h-10 items-center rounded-md bg-amber-500 px-5 text-sm font-semibold text-white hover:bg-amber-600">
+                    <div class="border-t p-6">
 
-                                Edit Dokumen
+                        <h4 class="mb-3 text-lg font-semibold text-gray-800">
 
-                            </a>
+                            Isi Dokumen
 
-                            <a
-                                href="{{ route('ppid-documents.index') }}"
-                                class="inline-flex h-10 items-center rounded-md bg-gray-600 px-5 text-sm font-semibold text-white hover:bg-gray-700">
+                        </h4>
 
-                                Kembali
+                        <div class="prose max-w-none">
 
-                            </a>
+                            {!! $ppidDocument->content ?: '<p class="text-gray-400">Belum ada isi dokumen.</p>' !!}
+
+                        </div>
+
+                    </div>
+
+                    <div class="border-t bg-gray-50 px-6 py-5">
+
+                        <div class="flex items-center justify-between">
+
+                            <div class="text-sm text-gray-500">
+
+                                Dibuat:
+                                {{ optional($ppidDocument->created_at)->format('d M Y H:i') }}
+
+                                @if($ppidDocument->updated_at)
+
+                                    <br>
+
+                                    Diperbarui:
+                                    {{ optional($ppidDocument->updated_at)->format('d M Y H:i') }}
+
+                                @endif
+
+                            </div>
+
+                            <div class="flex gap-2">
+
+                                <a href="{{ route('ppid-documents.edit', $ppidDocument) }}"
+                                    class="inline-flex h-10 items-center rounded-md bg-amber-500 px-5 text-sm font-semibold text-white hover:bg-amber-600">
+
+                                    Edit Dokumen
+
+                                </a>
+
+                                <a href="{{ route('ppid-documents.index') }}"
+                                    class="inline-flex h-10 items-center rounded-md bg-gray-600 px-5 text-sm font-semibold text-white hover:bg-gray-700">
+
+                                    Kembali
+
+                                </a>
+
+                            </div>
 
                         </div>
 
@@ -301,8 +301,6 @@
 
         </div>
 
-    </div>
-
 </x-app-layout>
 
 
@@ -313,6 +311,6 @@
 
 
 
-                </div>
+</div>
 
-                </tbody>
+</tbody>
