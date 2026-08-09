@@ -1,4 +1,4 @@
-<x-app-layout>
+﻿<x-app-layout>
 
     <x-slot name="header">
 
@@ -102,7 +102,32 @@
 
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="mb-4 flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-4">
+    <div>
+        <p class="text-sm font-semibold text-gray-700">Kelola Dokumen PPID</p>
+        <p class="text-xs text-gray-500">Pilih beberapa dokumen menggunakan checkbox untuk menghapus sekaligus.</p>
+    </div>
+
+    <form
+        id="bulk-delete-form"
+        method="POST"
+        action="{{ route('ppid-documents.bulk-delete') }}"
+    >
+        @csrf
+        @method('DELETE')
+
+        <div id="bulk-delete-inputs"></div>
+
+        <button
+            type="submit"
+            class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+        >
+            Hapus Terpilih
+        </button>
+    </form>
+</div>
+
+<div class="overflow-x-auto">
 
                     <table class="min-w-full divide-y divide-gray-200">
 
@@ -258,27 +283,19 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     const checkAll = document.getElementById('check-all');
-    const rowChecks = () => document.querySelectorAll('.row-check');
+    const bulkForm = document.getElementById('bulk-delete-form');
+    const bulkInputs = document.getElementById('bulk-delete-inputs');
 
-    if (!checkAll) {
-        return;
-    }
+    const rowChecks = () =>
+        Array.from(document.querySelectorAll('.row-check'));
 
-    checkAll.addEventListener('change', function () {
+    function updateCheckAll() {
 
-        rowChecks().forEach(function (checkbox) {
-            checkbox.checked = checkAll.checked;
-        });
+        const checks = rowChecks();
 
-    });
-
-    document.addEventListener('change', function (event) {
-
-        if (!event.target.classList.contains('row-check')) {
+        if (!checkAll) {
             return;
         }
-
-        const checks = Array.from(rowChecks());
 
         checkAll.checked =
             checks.length > 0 &&
@@ -291,11 +308,82 @@ document.addEventListener('DOMContentLoaded', function () {
                 return checkbox.checked;
             }) &&
             !checkAll.checked;
+    }
+
+    if (checkAll) {
+
+        checkAll.addEventListener('change', function () {
+
+            rowChecks().forEach(function (checkbox) {
+                checkbox.checked = checkAll.checked;
+            });
+
+            updateCheckAll();
+        });
+    }
+
+    document.addEventListener('change', function (event) {
+
+        if (event.target.classList.contains('row-check')) {
+            updateCheckAll();
+        }
 
     });
+
+    if (bulkForm) {
+
+        bulkForm.addEventListener('submit', function (event) {
+
+            const selected = rowChecks().filter(function (checkbox) {
+                return checkbox.checked;
+            });
+
+            if (selected.length === 0) {
+
+                event.preventDefault();
+
+                alert('Silakan pilih minimal satu dokumen PPID.');
+
+                return;
+            }
+
+            bulkInputs.innerHTML = '';
+
+            selected.forEach(function (checkbox) {
+
+                const input = document.createElement('input');
+
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = checkbox.value;
+
+                bulkInputs.appendChild(input);
+            });
+
+        });
+    }
+
+    window.confirmBulkDelete = function () {
+
+        const selected = rowChecks().filter(function (checkbox) {
+            return checkbox.checked;
+        });
+
+        if (selected.length === 0) {
+
+            alert('Silakan pilih minimal satu dokumen PPID.');
+
+            return false;
+        }
+
+        return confirm(
+            'Yakin ingin menghapus ' +
+            selected.length +
+            ' dokumen PPID terpilih?'
+        );
+    };
 
 });
 </script>
 
 </x-app-layout>
-

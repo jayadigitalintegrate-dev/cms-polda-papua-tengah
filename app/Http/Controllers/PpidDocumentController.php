@@ -472,6 +472,54 @@ public function download(PpidDocument $ppidDocument)
 
 
 
+  /**
+   * Hapus beberapa dokumen PPID sekaligus.
+   */
+  public function bulkDelete(Request $request)
+  {
+      $validated = $request->validate([
+          'ids' => [
+              'required',
+              'array',
+              'min:1',
+              'max:100',
+          ],
+          'ids.*' => [
+              'integer',
+              'distinct',
+              'exists:ppid_documents,id',
+          ],
+      ]);
+
+      $documents = PpidDocument::whereIn('id', $validated['ids'])->get();
+
+      foreach ($documents as $document) {
+
+          if (
+              $document->document &&
+              Storage::disk('public')->exists($document->document)
+          ) {
+              Storage::disk('public')->delete($document->document);
+          }
+
+          if (
+              $document->thumbnail &&
+              Storage::disk('public')->exists($document->thumbnail)
+          ) {
+              Storage::disk('public')->delete($document->thumbnail);
+          }
+      }
+
+      $deleted = PpidDocument::whereIn('id', $validated['ids'])->delete();
+
+      return redirect()
+          ->route('ppid-documents.index')
+          ->with(
+              'success',
+              $deleted . ' dokumen PPID berhasil dihapus.'
+          );
+  }
+
   public function destroy(
     PpidDocument $ppidDocument
 ) {

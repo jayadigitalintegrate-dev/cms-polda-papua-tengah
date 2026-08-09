@@ -10,6 +10,10 @@ class NewsController extends Controller
     public function index()
     {
         $news = News::where('status', 'published')
+            ->whereNotIn('category', [
+                'pengumuman-popup',
+                'pengumuman-resmi',
+            ])
             ->latest('published_at')
             ->get([
                 'id',
@@ -32,14 +36,18 @@ class NewsController extends Controller
                     'excerpt' => $item->excerpt,
                     'content' => $item->content,
                     'image' => $item->image,
+
                     'image_url' => $item->image
                         ? asset('storage/' . $item->image)
                         : null,
+
                     'document' => $item->document,
                     'document_name' => $item->document_name,
+
                     'document_url' => $item->document
                         ? asset('storage/' . $item->document)
                         : null,
+
                     'category' => $item->category,
                     'published_at' => $item->published_at,
                     'created_at' => $item->created_at,

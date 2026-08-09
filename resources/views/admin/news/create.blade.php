@@ -45,7 +45,7 @@
                             Judul Berita
                         </label>
 
-                        <input type="text" name="title" value="{{ old('title',$ppidDocument->title) }}"
+                        <input type="text" name="title" value="{{ old('title') }}"
                             class="w-full rounded-lg border-gray-300">
 
                         @error('title')
@@ -262,3 +262,5 @@
     </div>
 
 </x-app-layout>
+
+
