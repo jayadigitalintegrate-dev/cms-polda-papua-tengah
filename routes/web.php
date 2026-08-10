@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PPIDRequestController;
 use App\Http\Controllers\PpidCategoryController;
@@ -65,6 +66,18 @@ Route::middleware('auth')->group(function () {
     )->name('news.export-pdf');
 
     Route::resource('news', NewsController::class);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | HERO WEBSITE
+    |--------------------------------------------------------------------------
+    |
+    | Hero digunakan untuk slider utama pada website publik Polda Papua Tengah.
+    |
+    */
+
+    Route::resource('heroes', HeroController::class);
 
 
     /*

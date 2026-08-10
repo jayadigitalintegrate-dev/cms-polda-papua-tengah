@@ -1,4 +1,4 @@
-﻿<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -173,6 +173,15 @@
                             >
                                 Berita Video
                             </x-dropdown-link>
+                          {{-- HERO --}}
+                          <div class="border-t border-gray-100 my-1"></div>
+
+                          <x-dropdown-link
+                              :href="route('heroes.index')"
+                              :active="request()->routeIs('heroes.*')"
+                          >
+                              Hero
+                          </x-dropdown-link>
 
                         </x-slot>
 
