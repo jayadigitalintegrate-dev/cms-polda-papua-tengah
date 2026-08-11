@@ -10,7 +10,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\OfficialController;
+use App\Http\Controllers\PoliceStationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,20 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::resource('heroes', HeroController::class);
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| PEJABAT
+|--------------------------------------------------------------------------
+|
+| Data pejabat Polda Papua Tengah yang ditampilkan pada website publik.
+|
+*/
+
+Route::resource('officials', OfficialController::class);
+Route::resource('police-stations', PoliceStationController::class);
 
 
     /*
