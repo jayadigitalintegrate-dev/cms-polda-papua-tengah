@@ -16,3 +16,6 @@ Route::post('/complaints', [ComplaintController::class, 'store']);
 Route::post('/ppid-requests', [PPIDRequestController::class, 'store']);
 
 Route::get('/ppid-documents', [PpidDocumentController::class, 'index']);
+
+Route::get('/officials', [\App\Http\Controllers\Api\OfficialController::class, 'index']);
+Route::get('/police-stations', [\App\Http\Controllers\Api\PoliceStationController::class, 'index']);
