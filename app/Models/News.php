@@ -9,22 +9,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class News extends Model
 {
     protected $fillable = [
-    'title',
-    'slug',
-    'excerpt',
-    'content',
-    'image',
-    'document',
-    'document_name',
-    'category',
-    'status',
-    'author_id',
-    'allow_comment',
-    'show_author',
-    'show_date',
-    'last_modified_by',
-    'published_at',
-];
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'image',
+        'document',
+        'document_name',
+        'category',
+        'status',
+        'featured',
+        'sort_order',
+        'author_id',
+        'allow_comment',
+        'show_author',
+        'show_date',
+        'last_modified_by',
+        'published_at',
+    ];
 
     /**
      * Relasi ke penulis berita.
@@ -59,6 +61,8 @@ class News extends Model
     protected function casts(): array
     {
         return [
+            'featured' => 'boolean',
+            'sort_order' => 'integer',
             'allow_comment' => 'boolean',
             'show_author' => 'boolean',
             'show_date' => 'boolean',

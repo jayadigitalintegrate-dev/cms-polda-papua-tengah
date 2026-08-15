@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OfficialController;
 use App\Http\Controllers\PoliceStationController;
+use App\Http\Controllers\Api\NewsController as ApiNewsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +24,20 @@ use App\Http\Controllers\PoliceStationController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+/*
+|--------------------------------------------------------------------------
+| API PUBLIC ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/api/news', [ApiNewsController::class, 'index']);
+
+Route::get(
+    '/api/announcement-popup',
+    [ApiNewsController::class, 'popup']
+);
 
 
 /*
@@ -68,6 +84,14 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('news', NewsController::class);
 
+/*
+|--------------------------------------------------------------------------
+| PENGUMUMAN
+|--------------------------------------------------------------------------
+*/
+
+Route::resource('announcements', AnnouncementController::class);
+
 
     /*
     |--------------------------------------------------------------------------
@@ -81,18 +105,17 @@ Route::middleware('auth')->group(function () {
     Route::resource('heroes', HeroController::class);
 
 
-
     /*
-|--------------------------------------------------------------------------
-| PEJABAT
-|--------------------------------------------------------------------------
-|
-| Data pejabat Polda Papua Tengah yang ditampilkan pada website publik.
-|
-*/
+    |--------------------------------------------------------------------------
+    | PEJABAT & POLRES
+    |--------------------------------------------------------------------------
+    |
+    | Data pejabat dan satuan kerja Polda Papua Tengah.
+    |
+    */
 
-Route::resource('officials', OfficialController::class);
-Route::resource('police-stations', PoliceStationController::class);
+    Route::resource('officials', OfficialController::class);
+    Route::resource('police-stations', PoliceStationController::class);
 
 
     /*
