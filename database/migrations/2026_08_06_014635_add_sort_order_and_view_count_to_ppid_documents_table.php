@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,13 +13,17 @@ return new class extends Migration
     {
         Schema::table('ppid_documents', function (Blueprint $table) {
 
-            $table->unsignedInteger('sort_order')
-                ->default(0)
-                ->after('publication_year');
+            if (! Schema::hasColumn('ppid_documents', 'sort_order')) {
+                $table->unsignedInteger('sort_order')
+                    ->default(0)
+                    ->after('publication_year');
+            }
 
-            $table->unsignedBigInteger('view_count')
-                ->default(0)
-                ->after('download_count');
+            if (! Schema::hasColumn('ppid_documents', 'view_count')) {
+                $table->unsignedBigInteger('view_count')
+                    ->default(0)
+                    ->after('download_count');
+            }
 
         });
     }
