@@ -16,7 +16,7 @@
                 href="{{ route('officials.index') }}"
                 class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
             >
-                â† Kembali
+               &#8592; Kembali
             </a>
         </div>
     </x-slot>
@@ -159,15 +159,15 @@
                    {{-- JABATAN INDONESIA --}}
 <div>
     <label
-        for="position_id"
+        for="position_ref_id"
         class="block text-sm font-medium text-gray-700"
     >
         Jabatan *
     </label>
 
     <select
-        id="position_id"
-        name="position_id"
+        id="position_ref_id"
+        name="position_ref_id"
         required
         class="mt-2 block w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
     >
@@ -175,16 +175,16 @@
 
         @foreach ($positions as $position)
             <option
-                value="{{ $position['value'] }}"
-               data-position-en="{{ $position['position_en'] }}"
-                @selected(old('position_id') === $position['value'])
+                value="{{ $position->id }}"
+               data-position-en="{{ $position->name_en }}"
+                @selected((string) old('position_ref_id') === (string) $position->id)
             >
-                {{ $position['label'] }}
+                {{ $position->name_id }}
             </option>
         @endforeach
     </select>
 
-    @error('position_id')
+    @error('position_ref_id')
         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
     @enderror
 </div>
@@ -566,7 +566,7 @@ Lemhannas"
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const positionSelect = document.getElementById('position_id');
+        const positionSelect = document.getElementById('position_ref_id');
         const positionEnInput = document.getElementById('position_en');
 
         if (!positionSelect || !positionEnInput) {

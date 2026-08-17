@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Official extends Model
 {
@@ -12,6 +13,7 @@ class Official extends Model
         'name_en',
         'rank',
         'position_id',
+        'position_ref_id',
         'position_en',
         'nrp',
         'birth_place',
@@ -39,5 +41,10 @@ class Official extends Model
             'children' => 'integer',
             'sort_order' => 'integer',
         ];
+    }
+
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class, 'position_ref_id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Official;
+use App\Models\Position;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -19,7 +20,10 @@ class OfficialController extends Controller
 
     public function create()
     {
-        $positions = config('official_positions', []);
+        $positions = Position::where('status', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name_id', 'name_en']);
 
         return view('admin.officials.create', compact('positions'));
     }
@@ -27,6 +31,7 @@ class OfficialController extends Controller
     public function store(Request $request)
     {
         $validated = $this->validateOfficial($request);
+        $validated = $this->syncPositionData($validated);
 
         foreach ([
             'education_text' => 'education',
@@ -64,7 +69,10 @@ class OfficialController extends Controller
 
     public function edit(Official $official)
     {
-        $positions = config('official_positions', []);
+        $positions = Position::where('status', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'name_id', 'name_en']);
 
         return view('admin.officials.edit', compact('official', 'positions'));
     }
@@ -72,6 +80,7 @@ class OfficialController extends Controller
     public function update(Request $request, Official $official)
     {
         $validated = $this->validateOfficial($request);
+        $validated = $this->syncPositionData($validated);
 
         foreach ([
             'education_text' => 'education',
@@ -119,11 +128,20 @@ class OfficialController extends Controller
             ->with('success', 'Data pejabat berhasil dihapus.');
     }
 
+    private function syncPositionData(array $validated): array
+    {
+        $position = Position::where('status', true)
+            ->findOrFail($validated['position_ref_id']);
+
+        $validated['position_id'] = $position->name_id;
+        $validated['position_en'] = $position->name_en;
+
+        return $validated;
+    }
     private function validateOfficial(Request $request): array
     {
-        $allowedPositions = collect(config('official_positions', []))
-            ->pluck('value')
-            ->all();
+        // Jabatan utama sekarang menggunakan tabel positions.
+        // position_id dan position_en tetap dipertahankan untuk kompatibilitas data lama.
 
         return $request->validate([
             'photo' => [
@@ -151,10 +169,10 @@ class OfficialController extends Controller
                 'max:255',
             ],
 
-            'position_id' => [
+            'position_ref_id' => [
                 'required',
-                'string',
-                'in:' . implode(',', $allowedPositions),
+                'integer',
+                'exists:positions,id',
             ],
 
             'position_en' => [
