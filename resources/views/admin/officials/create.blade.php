@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
 
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -190,28 +190,7 @@
 </div>
 
 
-{{-- JABATAN INGGRIS --}}
-<div>
-    <label
-        for="position_en"
-        class="block text-sm font-medium text-gray-700"
-    >
-        Jabatan Bahasa Inggris
-    </label>
 
-    <input
-        id="position_en"
-        name="position_en"
-        type="text"
-        value="{{ old('position_en') }}"
-        readonly
-        class="mt-2 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm text-gray-700 shadow-sm"
-        placeholder="Akan terisi otomatis"
-    >
-
-    @error('position_en')
-        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-    @enderror
 </div>
                         {{-- JABATAN INGGRIS --}}
                         <div>
