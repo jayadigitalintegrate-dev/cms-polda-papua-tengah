@@ -28,6 +28,23 @@ class OfficialController extends Controller
     {
         $validated = $this->validateOfficial($request);
 
+        foreach ([
+            'education_text' => 'education',
+            'assignments_text' => 'assignments',
+            'career_text' => 'career',
+            'awards_text' => 'awards',
+        ] as $textField => $arrayField) {
+            if ($request->has($textField)) {
+                $validated[$arrayField] = collect(
+                    preg_split('/\r\n|\r|\n/', (string) $request->input($textField))
+                )
+                    ->map(fn ($item) => trim($item))
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        }
+
         if ($request->hasFile('photo')) {
             $validated['photo'] = $request->file('photo')
                 ->store('officials', 'public');
@@ -55,6 +72,23 @@ class OfficialController extends Controller
     public function update(Request $request, Official $official)
     {
         $validated = $this->validateOfficial($request);
+
+        foreach ([
+            'education_text' => 'education',
+            'assignments_text' => 'assignments',
+            'career_text' => 'career',
+            'awards_text' => 'awards',
+        ] as $textField => $arrayField) {
+            if ($request->has($textField)) {
+                $validated[$arrayField] = collect(
+                    preg_split('/\r\n|\r|\n/', (string) $request->input($textField))
+                )
+                    ->map(fn ($item) => trim($item))
+                    ->filter()
+                    ->values()
+                    ->all();
+            }
+        }
 
         if ($request->hasFile('photo')) {
             if ($official->photo) {
