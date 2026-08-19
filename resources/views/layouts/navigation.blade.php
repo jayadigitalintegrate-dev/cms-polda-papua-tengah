@@ -391,7 +391,16 @@
                         </x-dropdown-link>
 
 
-                        {{-- Settings --}}
+                        {{-- Kontak --}}
+                        <x-dropdown-link
+                            :href="route('contact.edit')"
+                        >
+                            Kontak
+                        </x-dropdown-link>
+
+
+
+                {{-- Settings --}}
                         @if (Auth::user()?->role === 'superadmin')
 
                             <x-dropdown-link
@@ -677,6 +686,14 @@
                     :href="route('profile.edit')"
                 >
                     Profile
+                </x-responsive-nav-link>
+
+
+                {{-- Kontak --}}
+                <x-responsive-nav-link
+                    :href="route('contact.edit')"
+                >
+                    Kontak
                 </x-responsive-nav-link>
 
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\ContactSettingController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PPIDRequestController;
@@ -202,6 +203,22 @@ Route::resource('announcements', AnnouncementController::class);
     | Foto profile nantinya dikelola melalui Settings.
     |
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | KONTAK
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/contact',
+        [ContactSettingController::class, 'edit']
+    )->name('contact.edit');
+
+    Route::put(
+        '/contact',
+        [ContactSettingController::class, 'update']
+    )->name('contact.update');
 
     Route::get(
         '/profile',
