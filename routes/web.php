@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\Api\ContactController as ApiContactController;
 use App\Http\Controllers\ContactSettingController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
@@ -34,6 +35,10 @@ Route::get('/', function () {
 */
 
 Route::get('/api/news', [ApiNewsController::class, 'index']);
+
+Route::get('/api/contact', [ApiContactController::class, 'index']);
+
+
 
 Route::get(
     '/api/announcement-popup',
