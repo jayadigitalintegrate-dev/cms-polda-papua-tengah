@@ -48,6 +48,30 @@ class NewsController extends Controller
                 ),
             ],
             'category' => ['required', 'exists:news_categories,slug'],
+            'youtube_url' => [
+                'nullable',
+                'url',
+                Rule::requiredIf(fn () => $request->input('category') === 'video'),
+                function ($attribute, $value, $fail) {
+                    if (!$value) {
+                        return;
+                    }
+
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+
+                    $allowed = [
+                        'youtube.com',
+                        'www.youtube.com',
+                        'youtu.be',
+                        'www.youtu.be',
+                        'm.youtube.com',
+                    ];
+
+                    if (!in_array($host, $allowed, true)) {
+                        $fail('URL video harus berasal dari YouTube.');
+                    }
+                },
+            ],
 
             'image' => [
                 'nullable',
@@ -99,6 +123,7 @@ class NewsController extends Controller
                 'excerpt' => $validated['excerpt'] ?? null,
                 'content' => $validated['content'],
                 'category' => $validated['category'],
+                'youtube_url' => $validated['youtube_url'] ?? null,
                 'image' => $cover,
                 'document' => $documentPath,
                 'document_name' => $documentName,
@@ -154,6 +179,30 @@ public function update(Request $request, News $news)
         'category' => [
             'required',
             'exists:news_categories,slug',
+        ],
+        'youtube_url' => [
+            'nullable',
+            'url',
+            Rule::requiredIf(fn () => $request->input('category') === 'video'),
+            function ($attribute, $value, $fail) {
+                if (!$value) {
+                    return;
+                }
+
+                $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+
+                $allowed = [
+                    'youtube.com',
+                    'www.youtube.com',
+                    'youtu.be',
+                    'www.youtu.be',
+                    'm.youtube.com',
+                ];
+
+                if (!in_array($host, $allowed, true)) {
+                    $fail('URL video harus berasal dari YouTube.');
+                }
+            },
         ],
 
         'excerpt' => [

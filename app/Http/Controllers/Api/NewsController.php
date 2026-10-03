@@ -30,6 +30,7 @@ class NewsController extends Controller
                 'excerpt',
                 'content',
                 'image',
+                'youtube_url',
                 'document',
                 'document_name',
                 'category',
@@ -46,6 +47,7 @@ class NewsController extends Controller
                     'excerpt' => $item->excerpt,
                     'content' => $item->content,
                     'image' => $item->image,
+                    'youtube_url' => $item->youtube_url,
 
                     'image_url' => $item->image
                         ? asset('storage/' . $item->image)

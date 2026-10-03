@@ -14,6 +14,7 @@ class News extends Model
         'excerpt',
         'content',
         'image',
+        'youtube_url',
         'document',
         'document_name',
         'category',

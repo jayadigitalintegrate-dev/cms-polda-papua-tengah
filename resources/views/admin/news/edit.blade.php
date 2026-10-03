@@ -95,6 +95,33 @@
                         @enderror
 
                     </div>
+                    {{-- YouTube Video --}}
+                    <div id="youtubeContainer" class="mb-5 hidden">
+
+                        <label class="block font-semibold mb-2">
+                            URL YouTube
+                        </label>
+
+                        <input
+                            id="youtube_url"
+                            type="url"
+                            name="youtube_url"
+                            value="{{ old('youtube_url', $news->youtube_url) }}"
+                            placeholder="https://www.youtube.com/watch?v=... atau https://youtu.be/..."
+                            class="w-full rounded-lg border-gray-300"
+                        >
+
+                        <p class="text-sm text-gray-500 mt-2">
+                            Khusus Berita Video. Masukkan URL video YouTube saja.
+                        </p>
+
+                        @error('youtube_url')
+                            <div class="text-red-600 text-sm mt-1">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
 
 
                     {{-- Cover Berita --}}
@@ -364,5 +391,24 @@
 
     </script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const categorySelect = document.querySelector('select[name="category"]');
+            const youtubeContainer = document.getElementById('youtubeContainer');
+
+            function toggleYoutubeField() {
+                if (!categorySelect || !youtubeContainer) return;
+
+                youtubeContainer.classList.toggle(
+                    'hidden',
+                    categorySelect.value !== 'video'
+                );
+            }
+
+            categorySelect?.addEventListener('change', toggleYoutubeField);
+
+            toggleYoutubeField();
+        });
+    </script>
 
 </x-app-layout>
