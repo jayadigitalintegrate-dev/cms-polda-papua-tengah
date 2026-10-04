@@ -13,11 +13,18 @@ use Illuminate\Validation\Rule;
 
 class NewsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $news = News::with('newsCategory')
-            ->latest()
-            ->paginate(10);
+        $query = News::with('newsCategory')
+            ->latest();
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->input('category'));
+        }
+
+        $news = $query
+            ->paginate(10)
+            ->withQueryString();
 
         return view('admin.news.index', compact('news'));
     }

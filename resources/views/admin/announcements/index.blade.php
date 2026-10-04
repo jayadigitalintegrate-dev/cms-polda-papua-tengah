@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -12,7 +12,7 @@
             </div>
 
             <a
-                href="{{ route('announcements.create') }}"
+                href="{{ route('announcements.create', ['type' => request('type')]) }}"
                 class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
             >
                 + Tambah Pengumuman
@@ -208,7 +208,7 @@
                                         </div>
 
                                         <a
-                                            href="{{ route('announcements.create') }}"
+                                            href="{{ route('announcements.create', ['type' => request('type')]) }}"
                                             class="mt-3 inline-flex text-sm font-semibold text-blue-600 hover:text-blue-700"
                                         >
                                             Tambah pengumuman pertama

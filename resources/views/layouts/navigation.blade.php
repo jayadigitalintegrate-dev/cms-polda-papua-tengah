@@ -109,22 +109,6 @@
                             </x-dropdown-link>
 
 
-                            {{-- Pengumuman --}}
-                            <x-dropdown-link
-                                :href="route('news.index', ['category' => 'pengumuman'])"
-                            >
-                                Pengumuman
-                            </x-dropdown-link>
-
-
-                            {{-- Pengumuman Popup --}}
-                            <x-dropdown-link
-                                :href="route('news.index', ['category' => 'pengumuman-popup'])"
-                            >
-                                Pengumuman Popup
-                            </x-dropdown-link>
-
-
                             {{-- Himbauan --}}
                             <x-dropdown-link
                                 :href="route('news.index', ['category' => 'himbauan'])"
@@ -169,7 +153,7 @@
                             <div class="border-t border-gray-100 my-1"></div>
 
                             <x-dropdown-link
-                                :href="route('news.index', ['type' => 'video'])"
+                                :href="route('news.index', ['category' => 'video'])"
                             >
                                 Berita Video
                             </x-dropdown-link>
@@ -204,12 +188,55 @@
                     {{-- PENGUMUMAN --}}
                     {{-- ===================================================== --}}
 
-                    <x-nav-link
-                        :href="route('announcements.index')"
-                        :active="request()->routeIs('announcements.*')"
-                    >
-                        Pengumuman
-                    </x-nav-link>
+                    <x-dropdown align="left" width="56">
+
+                        <x-slot name="trigger">
+
+                            <button
+                                class="inline-flex items-center self-stretch px-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
+                                {{ request()->routeIs('announcements.*')
+                                    ? 'border-indigo-400 text-gray-900'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}"
+                            >
+
+                                <span>Pengumuman</span>
+
+                                <svg
+                                    class="ms-1 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+
+                            </button>
+
+                        </x-slot>
+
+                        <x-slot name="content">
+
+                            <x-dropdown-link
+                                :href="route('announcements.index')"
+                            >
+                                Semua Pengumuman
+                            </x-dropdown-link>
+
+                            <x-dropdown-link
+                                :href="route('announcements.index', ['type' => 'popup'])"
+                            >
+                                Pengumuman Popup
+                            </x-dropdown-link>
+
+                        </x-slot>
+
+                    </x-dropdown>
 
 
                     {{-- ===================================================== --}}

@@ -57,42 +57,43 @@
                     </div>
 
 
-                    {{-- Kategori --}}
-                    <div class="mb-5">
+                    {{-- Category Context --}}
+                    @php
+                        $selectedCategorySlug = old('category', request('category', 'berita-utama'));
+                        $selectedCategory = $categories->firstWhere('slug', $selectedCategorySlug);
+                    @endphp
 
+                    <div class="mb-5">
                         <label class="block font-semibold mb-2">
                             Kategori
                         </label>
 
-                        <select name="category" class="w-full rounded-lg border-gray-300">
+                        <input
+                            type="text"
+                            value="{{ $selectedCategory?->name ?? $selectedCategorySlug }}"
+                            class="w-full rounded-lg border-gray-300 bg-gray-100"
+                            readonly
+                        >
 
-                            <option value="">
-                                -- Pilih Kategori --
-                            </option>
+                        <input
+                            type="hidden"
+                            name="category"
+                            value="{{ $selectedCategorySlug }}"
+                        >
 
-                            @foreach($categories as $category)
-
-                                <option value="{{ $category->slug }}" @selected(old('category') == $category->slug)>
-
-                                    {{ $category->name }}
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
+                        <p class="text-sm text-gray-500 mt-2">
+                            Kategori otomatis mengikuti menu berita yang dipilih.
+                        </p>
 
                         @error('category')
                             <div class="text-red-600 text-sm mt-1">
                                 {{ $message }}
                             </div>
                         @enderror
-
                     </div>
 
-
                     {{-- YouTube Video --}}
-                    <div id="youtubeContainer" class="mb-5 hidden">
+                    <div id="youtubeContainer" class="mb-5 {{ $selectedCategorySlug === 'video' ? '' : 'hidden' }}">
 
                         <label class="block font-semibold mb-2">
                             URL YouTube
@@ -118,7 +119,6 @@
                         @enderror
 
                     </div>
-
                     {{-- Cover Berita --}}
                     <div class="mb-5">
 
@@ -292,23 +292,4 @@
 
     </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const categorySelect = document.querySelector('select[name="category"]');
-    const youtubeContainer = document.getElementById('youtubeContainer');
-
-    function toggleYoutubeField() {
-        if (!categorySelect || !youtubeContainer) return;
-
-        youtubeContainer.classList.toggle(
-            'hidden',
-            categorySelect.value !== 'video'
-        );
-    }
-
-    categorySelect?.addEventListener('change', toggleYoutubeField);
-
-    toggleYoutubeField();
-});
-</script>
 </x-app-layout>

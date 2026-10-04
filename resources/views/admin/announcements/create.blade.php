@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
 
     <x-slot name="header">
         <div>
@@ -190,26 +190,41 @@
                                 Tipe <span class="text-red-500">*</span>
                             </label>
 
-                            <select
-                                id="type"
-                                name="type"
-                                required
-                                class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                                <option value="">-- Pilih Tipe --</option>
+                            @if(request('type') === 'popup')
+                                <input
+                                    type="text"
+                                    value="Popup"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100"
+                                    readonly
+                                >
 
-                                <option value="popup" @selected(old('type') === 'popup')>
-                                    Popup
-                                </option>
+                                <input
+                                    type="hidden"
+                                    name="type"
+                                    value="popup"
+                                >
+                            @else
+                                <select
+                                    id="type"
+                                    name="type"
+                                    required
+                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                >
+                                    <option value="">-- Pilih Tipe --</option>
 
-                                <option value="banner" @selected(old('type') === 'banner')>
-                                    Banner
-                                </option>
+                                    <option value="popup" @selected(old('type') === 'popup')>
+                                        Popup
+                                    </option>
 
-                                <option value="info" @selected(old('type') === 'info')>
-                                    Informasi
-                                </option>
-                            </select>
+                                    <option value="banner" @selected(old('type') === 'banner')>
+                                        Banner
+                                    </option>
+
+                                    <option value="info" @selected(old('type') === 'info')>
+                                        Informasi
+                                    </option>
+                                </select>
+                            @endif
 
                             @error('type')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>

@@ -13,7 +13,7 @@
                 </p>
             </div>
 
-            <a href="{{ route('news.create') }}"
+            <a href="{{ route('news.create', ['category' => request('category', 'berita-utama')]) }}"
                 class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-3 font-semibold text-white shadow hover:bg-green-700 transition">
 
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
@@ -64,7 +64,7 @@
 
                     </div>
 
-                    <a href="{{ route('news.create') }}"
+                    <a href="{{ route('news.create', ['category' => request('category', 'berita-utama')]) }}"
                         class="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
 
                         Tambah Berita
@@ -213,7 +213,7 @@
                             Silakan tambahkan berita pertama untuk Website Polda Papua Tengah.
                         </p>
 
-                        <a href="{{ route('news.create') }}"
+                        <a href="{{ route('news.create', ['category' => request('category', 'berita-utama')]) }}"
                             class="mt-6 inline-flex items-center rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700">
 
                             Tambah Berita

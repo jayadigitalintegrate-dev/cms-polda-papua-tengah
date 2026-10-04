@@ -60,43 +60,37 @@
                     </div>
 
 
-                    {{-- Kategori --}}
+                    {{-- Category Context --}}
                     <div class="mb-5">
-
                         <label class="block font-semibold mb-2">
                             Kategori
                         </label>
 
-                        <select name="category" class="w-full rounded-lg border-gray-300">
+                        <input
+                            type="text"
+                            value="{{ $news->newsCategory?->name ?? $news->category }}"
+                            class="w-full rounded-lg border-gray-300 bg-gray-100"
+                            readonly
+                        >
 
-                            <option value="">
-                                -- Pilih Kategori --
-                            </option>
+                        <input
+                            type="hidden"
+                            name="category"
+                            value="{{ $news->category }}"
+                        >
 
-                            @foreach($categories as $category)
-
-                                <option value="{{ $category->slug }}" @selected(
-                                    old('category', $news->category)
-                                    == $category->slug
-                                )>
-
-                                    {{ $category->name }}
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
+                        <p class="text-sm text-gray-500 mt-2">
+                            Kategori tidak dapat diubah dari editor.
+                        </p>
 
                         @error('category')
                             <div class="text-red-600 text-sm mt-1">
                                 {{ $message }}
                             </div>
                         @enderror
-
                     </div>
                     {{-- YouTube Video --}}
-                    <div id="youtubeContainer" class="mb-5 hidden">
+                    <div id="youtubeContainer" class="mb-5 {{ $news->category === 'video' ? '' : 'hidden' }}">
 
                         <label class="block font-semibold mb-2">
                             URL YouTube
@@ -389,26 +383,6 @@
 
         });
 
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const categorySelect = document.querySelector('select[name="category"]');
-            const youtubeContainer = document.getElementById('youtubeContainer');
-
-            function toggleYoutubeField() {
-                if (!categorySelect || !youtubeContainer) return;
-
-                youtubeContainer.classList.toggle(
-                    'hidden',
-                    categorySelect.value !== 'video'
-                );
-            }
-
-            categorySelect?.addEventListener('change', toggleYoutubeField);
-
-            toggleYoutubeField();
-        });
     </script>
 
 </x-app-layout>
