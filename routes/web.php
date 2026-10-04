@@ -4,6 +4,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\Api\ContactController as ApiContactController;
 use App\Http\Controllers\ContactSettingController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PPIDRequestController;
@@ -52,9 +53,7 @@ Route::get(
 |--------------------------------------------------------------------------
 */
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})
+Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
