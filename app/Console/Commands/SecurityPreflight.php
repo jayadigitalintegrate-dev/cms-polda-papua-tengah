@@ -144,7 +144,7 @@ class SecurityPreflight extends Command
 
             foreach (['bind_address', 'mysqlx_bind_address'] as $name) {
                 $value = (string) ($vars[$name] ?? '');
-                $this->record(in_array($value, ['127.0.0.1', '::1', 'localhost'], true), $production, 'Database', "{$name} hanya localhost", $value ?: '-');
+                $this->record(self::isLoopbackBindAddress($value), $production, 'Database', "{$name} hanya localhost", $value ?: '-');
             }
 
             $this->record(($vars['secure_file_priv'] ?? '') !== '', $production, 'Database', 'secure_file_priv dibatasi', ($vars['secure_file_priv'] ?? '') === '' ? 'kosong (tanpa batas)' : 'dibatasi');
@@ -152,6 +152,24 @@ class SecurityPreflight extends Command
         } catch (Throwable $e) {
             $this->results[] = ['WARN', 'Database', 'Pemeriksaan server MySQL', 'tidak dapat dibaca: ' . class_basename($e)];
         }
+    }
+
+    /**
+     * True bila bind_address / mysqlx_bind_address hanya berisi alamat loopback.
+     * MySQL 8.0.13+ menerima beberapa alamat dipisah koma (mis. "127.0.0.1,::1");
+     * setiap entry harus loopback. Nilai kosong tidak dianggap loopback.
+     */
+    public static function isLoopbackBindAddress(string $value): bool
+    {
+        $entries = array_map('trim', explode(',', $value));
+
+        foreach ($entries as $entry) {
+            if (! in_array($entry, ['127.0.0.1', '::1', 'localhost'], true)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
