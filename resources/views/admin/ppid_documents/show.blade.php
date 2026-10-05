@@ -247,7 +247,11 @@
 
                         <div class="prose max-w-none">
 
-                            {!! $ppidDocument->content ?: '<p class="text-gray-400">Belum ada isi dokumen.</p>' !!}
+                            @if ($ppidDocument->content)
+                                {!! nl2br(e($ppidDocument->content)) !!}
+                            @else
+                                <p class="text-gray-400">Belum ada isi dokumen.</p>
+                            @endif
 
                         </div>
 

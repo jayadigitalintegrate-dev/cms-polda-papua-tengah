@@ -27,7 +27,9 @@ class PpidDocumentController extends Controller
                     'content' => $document->content,
                     'document_number' => $document->document_number,
                     'document_name' => $document->document_name,
-                    'document_url' => $document->document_url,
+                    'document_url' => $document->document
+                        ? asset('storage/' . $document->document)
+                        : null,
                     'publication_year' => $document->publication_year,
                     'status' => $document->status,
                     'published_at' => $document->published_at,

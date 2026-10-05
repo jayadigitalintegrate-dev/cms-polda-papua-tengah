@@ -39,7 +39,13 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    /*
+     * Production tidak pernah mengirim stack trace / path internal ke client,
+     * walaupun APP_DEBUG=true terbawa dari template .env.
+     */
+    'debug' => env('APP_ENV', 'production') === 'production'
+        ? false
+        : (bool) env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------

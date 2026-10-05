@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
-use App\Http\Controllers\Api\ContactController as ApiContactController;
 use App\Http\Controllers\ContactSettingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HeroController;
@@ -16,7 +15,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OfficialController;
 use App\Http\Controllers\PoliceStationController;
-use App\Http\Controllers\Api\NewsController as ApiNewsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,21 +28,9 @@ Route::get('/', function () {
 
 
 /*
-|--------------------------------------------------------------------------
-| API PUBLIC ROUTES
-|--------------------------------------------------------------------------
+| API publik (news, contact, announcement-popup) didefinisikan di
+| routes/api.php agar tidak berjalan melalui web stack (session/cookie).
 */
-
-Route::get('/api/news', [ApiNewsController::class, 'index']);
-
-Route::get('/api/contact', [ApiContactController::class, 'index']);
-
-
-
-Route::get(
-    '/api/announcement-popup',
-    [ApiNewsController::class, 'popup']
-);
 
 
 /*
