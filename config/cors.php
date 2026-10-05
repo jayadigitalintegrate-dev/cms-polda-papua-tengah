@@ -17,13 +17,24 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['GET', 'POST'],
 
-    'allowed_origins' => ['*'],
+    /*
+     * Origin website yang boleh memanggil API dari browser.
+     * Atur via CORS_ALLOWED_ORIGINS (dipisah koma) untuk domain production.
+     * Default: dev server Vite lokal dan GitHub Pages.
+     */
+    'allowed_origins' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', env(
+            'CORS_ALLOWED_ORIGINS',
+            'http://localhost:5173,http://127.0.0.1:5173,https://jayadigitalintegrate-dev.github.io'
+        ) ?: '')
+    ))),
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => ['Content-Type', 'Accept', 'X-Requested-With'],
 
     'exposed_headers' => [],
 
