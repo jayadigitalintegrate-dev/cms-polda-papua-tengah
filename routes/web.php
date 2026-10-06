@@ -4,6 +4,8 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ContactSettingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GalleryCategoryController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PPIDRequestController;
@@ -177,6 +179,30 @@ Route::resource('announcements', AnnouncementController::class);
     Route::resource(
         'ppid-documents',
         PpidDocumentController::class
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GALERI - KATEGORI
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'gallery-categories',
+        GalleryCategoryController::class
+    )->except(['show']);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GALERI - ITEM
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource(
+        'galleries',
+        GalleryController::class
     );
 
 
