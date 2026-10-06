@@ -49,7 +49,7 @@ class NewsController extends Controller
                 Rule::requiredIf(
                     fn () => !in_array(
                         $request->input('category'),
-                        ['pengumuman-popup', 'pengumuman', 'ppid'],
+                        ['pengumuman-popup', 'pengumuman', 'ppid', 'video'],
                         true
                     )
                 ),
@@ -128,7 +128,8 @@ class NewsController extends Controller
                 'title' => $validated['title'],
                 'slug' => Str::slug($validated['title']),
                 'excerpt' => $validated['excerpt'] ?? null,
-                'content' => $validated['content'],
+                // Kolom content NOT NULL; kategori tanpa isi disimpan string kosong.
+                'content' => $validated['content'] ?? '',
                 'category' => $validated['category'],
                 'youtube_url' => $validated['youtube_url'] ?? null,
                 'image' => $cover,
@@ -227,6 +228,7 @@ public function update(Request $request, News $news)
                         'pengumuman-popup',
                         'pengumuman',
                         'ppid',
+                        'video',
                     ],
                     true
                 )
@@ -348,6 +350,14 @@ public function update(Request $request, News $news)
 
     $validated['last_modified_by'] =
         auth()->user()->name;
+
+    // Kolom content NOT NULL; kategori tanpa isi disimpan string kosong.
+    if (
+        array_key_exists('content', $validated) &&
+        $validated['content'] === null
+    ) {
+        $validated['content'] = '';
+    }
 
     /*
     |--------------------------------------------------------------------------

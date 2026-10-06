@@ -22,6 +22,7 @@ class NewsCategorySeeder extends Seeder
             'Lalu Lintas',
             'Kriminal',
             'PPID',
+            'Video',
 
         ];
 

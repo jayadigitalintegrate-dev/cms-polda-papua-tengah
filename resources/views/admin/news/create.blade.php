@@ -240,6 +240,12 @@
                             Isi Berita
                         </label>
 
+                        @if($selectedCategorySlug === 'video')
+                            <p class="text-xs text-gray-500 mb-2">
+                                Opsional untuk Berita Video. Konten utama berasal dari URL YouTube.
+                            </p>
+                        @endif
+
                         <textarea id="content" name="content" rows="12"
                             class="w-full rounded-lg border-gray-300">{{ old('content') }}</textarea>
 
