@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\GalleryCategory;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class GalleryCategorySeeder extends Seeder
@@ -17,6 +17,8 @@ class GalleryCategorySeeder extends Seeder
             'Operasional',
             'Sosial',
             'Event',
+            'Galeri Dokumentasi',
+            'Media Center',
 
         ];
 

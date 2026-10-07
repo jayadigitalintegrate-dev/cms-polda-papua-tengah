@@ -150,6 +150,14 @@
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ $gallery->galleryCategory?->name ?? '-' }}
+
+                                        @if($gallery->galleryCategory?->usesCollection())
+                                            <div class="mt-1">
+                                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-700">
+                                                    {{ $gallery->images_count }} foto
+                                                </span>
+                                            </div>
+                                        @endif
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

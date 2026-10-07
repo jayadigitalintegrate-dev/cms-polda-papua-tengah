@@ -27,3 +27,5 @@ Route::get('/ppid-documents', [PpidDocumentController::class, 'index'])->middlew
 Route::get('/officials', [\App\Http\Controllers\Api\OfficialController::class, 'index'])->middleware('throttle:public-read');
 
 Route::get('/police-stations', [\App\Http\Controllers\Api\PoliceStationController::class, 'index'])->middleware('throttle:public-read');
+
+Route::get('/galleries', [\App\Http\Controllers\Api\GalleryController::class, 'index'])->middleware('throttle:public-read');

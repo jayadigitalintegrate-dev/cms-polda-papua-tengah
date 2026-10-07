@@ -26,6 +26,23 @@
                         method="POST"
                         action="{{ route('galleries.store') }}"
                         enctype="multipart/form-data"
+                        x-data="{
+                            categoryId: @js((string) old('gallery_category_id', '')),
+                            documentationId: @js((string) ($documentationCategoryId ?? '')),
+                            mediaCenterId: @js((string) ($mediaCenterCategoryId ?? '')),
+                            status: @js((string) old('status', 'draft')),
+                            maxImages: @js($maxImages),
+                            photoCount: 0,
+                            get isDocumentation() {
+                                return this.documentationId !== '' && this.categoryId === this.documentationId;
+                            },
+                            get isMediaCenter() {
+                                return this.mediaCenterId !== '' && this.categoryId === this.mediaCenterId;
+                            },
+                            get isCollection() {
+                                return this.isDocumentation || this.isMediaCenter;
+                            },
+                        }"
                     >
                         @csrf
 
@@ -59,6 +76,7 @@
                                 <select
                                     id="gallery_category_id"
                                     name="gallery_category_id"
+                                    x-model="categoryId"
                                     required
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                 >
@@ -86,7 +104,8 @@
                                 @enderror
                             </div>
 
-                            <div>
+                            {{-- Foto tunggal (5 kategori reguler) --}}
+                            <div x-show="!isCollection">
                                 <label for="image" class="block text-sm font-medium text-gray-700">
                                     Foto
                                 </label>
@@ -97,6 +116,8 @@
                                     type="file"
                                     accept=".jpg,.jpeg,.png,.webp"
                                     required
+                                    x-bind:required="!isCollection"
+                                    x-bind:disabled="isCollection"
                                     class="mt-1 block w-full rounded-md border border-gray-300 text-sm"
                                 >
 
@@ -107,6 +128,51 @@
                                 @error('image')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
+                            </div>
+
+                            {{-- Koleksi foto 1–5 (Galeri Dokumentasi & Media Center) --}}
+                            <div x-show="isCollection" style="display: none">
+                                <label for="photos" class="block text-sm font-medium text-gray-700">
+                                    <span x-text="isMediaCenter ? 'Foto Media Center' : 'Foto Koleksi'">Foto Koleksi</span> (1–{{ $maxImages }} foto)
+                                </label>
+
+                                <input
+                                    id="photos"
+                                    name="photos[]"
+                                    type="file"
+                                    multiple
+                                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                                    disabled
+                                    x-bind:required="isCollection"
+                                    x-bind:disabled="!isCollection"
+                                    x-on:change="photoCount = $event.target.files.length"
+                                    class="mt-1 block w-full rounded-md border border-gray-300 text-sm"
+                                >
+
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Satu koleksi berisi minimal 1 dan maksimal {{ $maxImages }} foto.
+                                    Format JPG, PNG, atau WEBP. Maksimal 5 MB per foto.
+                                    Foto pertama menjadi sampul koleksi.
+                                </p>
+
+                                <p
+                                    class="mt-1 text-sm"
+                                    x-show="photoCount > 0"
+                                    x-bind:class="photoCount > maxImages ? 'text-red-600' : 'text-gray-600'"
+                                    x-text="photoCount > maxImages
+                                        ? photoCount + ' foto dipilih — melebihi batas ' + maxImages + ' foto.'
+                                        : photoCount + ' foto dipilih.'"
+                                ></p>
+
+                                @error('photos')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+
+                                @foreach($errors->get('photos.*') as $messages)
+                                    @foreach($messages as $message)
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @endforeach
+                                @endforeach
                             </div>
 
                             <div>
@@ -122,6 +188,31 @@
                                 >{{ old('description') }}</textarea>
 
                                 @error('description')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            {{-- Isi berita (khusus Media Center) --}}
+                            <div x-show="isMediaCenter" style="display: none">
+                                <label for="content" class="block text-sm font-medium text-gray-700">
+                                    Isi Berita
+                                </label>
+
+                                <textarea
+                                    id="content"
+                                    name="content"
+                                    rows="12"
+                                    disabled
+                                    x-bind:required="isMediaCenter"
+                                    x-bind:disabled="!isMediaCenter"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >{{ old('content') }}</textarea>
+
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Teks biasa; pisahkan paragraf dengan baris baru. Tag HTML tidak disimpan.
+                                </p>
+
+                                @error('content')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -154,6 +245,7 @@
                                     <select
                                         id="status"
                                         name="status"
+                                        x-model="status"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                     >
                                         <option value="draft" @selected(old('status', 'draft') === 'draft')>Draft</option>
@@ -216,7 +308,7 @@
                                 type="submit"
                                 class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                             >
-                                Simpan Galeri
+                                <span x-text="isMediaCenter ? (status === 'published' ? 'Publish' : 'Simpan Draft') : 'Simpan Galeri'">Simpan Galeri</span>
                             </button>
 
                         </div>
