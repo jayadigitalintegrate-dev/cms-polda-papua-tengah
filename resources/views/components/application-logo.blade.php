@@ -15,7 +15,7 @@
         >
     @else
         <img
-            src="{{ asset('images/logo/logo-polda-papua-tengah.png') }}"
+            src="{{ asset('images/logo/logo_papua_tengah_animasi.webp') }}"
             alt="Logo Polda Papua Tengah"
             class="h-10 w-auto object-contain"
         >

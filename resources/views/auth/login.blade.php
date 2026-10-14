@@ -4,7 +4,7 @@
         {{-- Logo Polda Papua Tengah --}}
         <div class="flex justify-center mb-6">
             <img
-                src="{{ asset('images/logo/logo-polda-papua-tengah.png') }}"
+                src="{{ asset('images/logo/logo_papua_tengah_animasi.webp') }}"
                 alt="Logo Polda Papua Tengah"
                 class="w-auto h-28 object-contain"
             >
