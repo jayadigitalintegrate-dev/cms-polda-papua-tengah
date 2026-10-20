@@ -10,7 +10,12 @@ class HttpsRedirectTest extends SecurityTestCase
     {
         parent::setUp();
 
-        config(['security.https_redirect_hosts' => [self::ALLOWED_HOST]]);
+        // HIGH-01: peer pengujian (127.0.0.1) berperan sebagai proxy terdaftar.
+        // Kasus proxy tidak terdaftar diuji di TrustedProxyTest.
+        config([
+            'security.https_redirect_hosts' => [self::ALLOWED_HOST],
+            'trustedproxy.proxies' => ['127.0.0.1'],
+        ]);
     }
 
     public function test_proxied_http_request_for_allowed_host_is_redirected_to_https(): void

@@ -3,11 +3,16 @@
 namespace App\Console\Commands;
 
 use App\Http\Middleware\SecurityHeaders;
+use App\Support\TrustedProxyList;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Http\Middleware\TrustProxies;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
+use ReflectionProperty;
 use Throwable;
 
 /**
@@ -90,6 +95,159 @@ class SecurityPreflight extends Command
 
         $hasHeaders = app(Kernel::class)->hasMiddleware(SecurityHeaders::class);
         $this->record($hasHeaders, true, 'Headers', 'SecurityHeaders middleware global', $hasHeaders ? 'aktif' : 'tidak aktif');
+
+        $this->checkTrustedProxies($production);
+    }
+
+    /**
+     * HIGH-01. Hanya membaca konfigurasi efektif dan state statis TrustProxies;
+     * tidak membaca env mentah dan tidak mencetak alamat atau nilai entri.
+     * Berbahaya, tidak konsisten, atau tidak dapat diverifikasi -> FAIL di semua
+     * environment. TRUSTED_PROXY_MODE tidak disetel -> FAIL di production, WARN
+     * di luar production. PASS hanya berarti konfigurasi konsisten, bukan bukti
+     * bahwa topologi infrastruktur sesuai.
+     */
+    private function checkTrustedProxies(bool $production): void
+    {
+        // withMiddleware() di bootstrap/app.php baru berjalan saat Kernel HTTP
+        // di-resolve; tanpa ini state statis at()/withHeaders() bisa masih null.
+        app(Kernel::class);
+
+        $proxies = config('trustedproxy.proxies');
+        $rejected = config('trustedproxy.rejected');
+        $mode = config('trustedproxy.mode');
+        $source = config('trustedproxy.mode_source');
+
+        $validList = is_array($proxies) && array_is_list($proxies)
+            && collect($proxies)->every(fn ($p) => is_string($p) && TrustedProxyList::isCanonicalEntry($p));
+        $this->record($validList, true, 'Proxy', 'Trusted proxy berupa daftar IP/CIDR kanonik', $validList ? count($proxies) . ' entri' : 'tidak valid');
+
+        $validRejected = TrustedProxyList::isRejectedMetadata($rejected);
+        $this->record($validRejected && $rejected === [], true, 'Proxy', 'TRUSTED_PROXIES tanpa segmen ditolak (fail-closed)',
+            ! $validRejected ? 'metadata tidak valid' : ($rejected === [] ? '-' : collect($rejected)->map(fn ($r) => "#{$r['position']}:{$r['reason']}")->implode(', ')));
+
+        $at = self::trustProxiesStatic('alwaysTrustProxies');
+        $this->record($at['found'] && $at['value'] === null, true, 'Proxy', 'TrustProxies::at() tidak menimpa config',
+            ! $at['found'] ? 'tidak dapat diverifikasi (properti internal Laravel berubah)' : ($at['value'] === null ? '-' : 'at() aktif'));
+
+        $headers = self::trustProxiesStatic('alwaysTrustHeaders');
+        $expected = Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO;
+        $this->record($headers['found'] && $headers['value'] === $expected, true, 'Proxy', 'Header dipercaya hanya X-Forwarded-For/Proto',
+            ! $headers['found'] ? 'tidak dapat diverifikasi (properti internal Laravel berubah)' : ($headers['value'] === $expected ? 'ya' : 'tidak'));
+
+        $stack = self::trustProxiesInGlobalStack(app(Kernel::class));
+        $this->record($stack === 'ok', true, 'Proxy', 'TrustProxies (kelas asli) di stack global', match ($stack) {
+            'ok' => 'ada',
+            'missing' => 'tidak ada',
+            'subclass' => 'subclass TrustProxies terdaftar',
+            default => 'tidak dapat diverifikasi',
+        });
+
+        if (laravel_cloud()) {
+            $this->results[] = ['INFO', 'Proxy', 'LARAVEL_CLOUD aktif', 'fallback trust-all dinetralkan oleh daftar berbentuk array'];
+        }
+
+        // Keputusan T-1: mode efektif selalu direct/proxied; selain 'declared'
+        // mode efektif wajib 'direct'.
+        $validMode = in_array($mode, TrustedProxyList::MODES, true)
+            && in_array($source, ['default', 'declared', 'invalid'], true)
+            && ($source === 'declared' || $mode === 'direct');
+        $this->record($validMode, true, 'Proxy', 'Metadata mode trusted proxy valid', $validMode ? "{$mode} ({$source})" : 'tidak valid');
+
+        if (! $validMode) {
+            return;
+        }
+
+        $this->record($source !== 'invalid', true, 'Proxy', 'TRUSTED_PROXY_MODE bernilai direct/proxied', $source === 'invalid' ? 'nilai tidak valid' : '-');
+
+        // G2-03: tanpa baris PASS "dinyatakan eksplisit" untuk nilai invalid.
+        if ($source === 'invalid') {
+            return;
+        }
+
+        $this->record($source !== 'default', $production, 'Proxy', 'TRUSTED_PROXY_MODE dinyatakan eksplisit', $source === 'default' ? '(tidak disetel, efektif direct)' : $mode);
+
+        if (! $validList || ! $validRejected) {
+            return;
+        }
+
+        $consistent = $rejected === [] && ($mode === 'direct' ? $proxies === [] : $proxies !== []);
+        $this->record($consistent, true, 'Proxy', 'Mode konsisten dengan daftar proxy', "{$mode}, " . count($proxies) . ' entri, ' . count($rejected) . ' ditolak');
+
+        if ($proxies !== []) {
+            $prefix = fn (string $p) => str_contains($p, '/') ? (int) explode('/', $p)[1] : (str_contains($p, ':') ? 128 : 32);
+            $v4 = collect($proxies)->reject(fn ($p) => str_contains($p, ':'))->map($prefix);
+            $v6 = collect($proxies)->filter(fn ($p) => str_contains($p, ':'))->map($prefix);
+            $this->results[] = ['INFO', 'Proxy', 'Prefix terluas (tanpa kebijakan batas)', 'IPv4 /' . ($v4->min() ?? '-') . ', IPv6 /' . ($v6->min() ?? '-')];
+        }
+    }
+
+    /**
+     * Membaca properti statis internal TrustProxies (Laravel 13.23:
+     * $alwaysTrustProxies baris 34, $alwaysTrustHeaders baris 41).
+     * Tidak pernah melempar: properti hilang atau bukan static -> found=false.
+     *
+     * @return array{found: bool, value: mixed}
+     */
+    public static function trustProxiesStatic(string $property): array
+    {
+        try {
+            $reflection = new ReflectionProperty(TrustProxies::class, $property);
+
+            if (! $reflection->isStatic()) {
+                return ['found' => false, 'value' => null];
+            }
+
+            return ['found' => true, 'value' => $reflection->getValue()];
+        } catch (Throwable) {
+            return ['found' => false, 'value' => null];
+        }
+    }
+
+    /**
+     * G2-02 (K4). Memeriksa stack global Kernel HTTP efektif lewat API publik
+     * getGlobalMiddleware(), tanpa request sintetis dan tanpa mengubah stack.
+     * 'ok' hanya bila TrustProxies asli ada dan tidak ada subclass-nya (subclass
+     * dapat menimpa proxies()); selain itu 'missing', 'subclass', atau
+     * 'unverifiable' (Kernel/API/tipe tidak sesuai atau exception).
+     */
+    public static function trustProxiesInGlobalStack(mixed $kernel): string
+    {
+        try {
+            if (! $kernel instanceof HttpKernel) {
+                return 'unverifiable';
+            }
+
+            $stack = $kernel->getGlobalMiddleware();
+
+            if (! is_array($stack)) {
+                return 'unverifiable';
+            }
+
+            $exact = false;
+
+            foreach ($stack as $middleware) {
+                $class = match (true) {
+                    is_string($middleware) => ltrim(explode(':', $middleware, 2)[0], '\\'),
+                    is_object($middleware) => get_class($middleware),
+                    default => null,
+                };
+
+                if ($class === null) {
+                    return 'unverifiable';
+                }
+
+                if (strcasecmp($class, TrustProxies::class) === 0) {
+                    $exact = true;
+                } elseif (is_subclass_of($class, TrustProxies::class)) {
+                    return 'subclass';
+                }
+            }
+
+            return $exact ? 'ok' : 'missing';
+        } catch (Throwable) {
+            return 'unverifiable';
+        }
     }
 
     private function checkPhp(bool $production): void
