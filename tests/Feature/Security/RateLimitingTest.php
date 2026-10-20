@@ -23,6 +23,25 @@ class RateLimitingTest extends SecurityTestCase
         $this->assertWriteEndpointThrottled('/api/ppid-requests');
     }
 
+    public function test_feedback_endpoint_is_throttled_per_ip_after_three_requests(): void
+    {
+        $attacker = ['REMOTE_ADDR' => '203.0.113.7'];
+
+        // Payload kosong: validasi gagal (422), tidak ada data tersimpan.
+        for ($i = 1; $i <= 3; $i++) {
+            $this->withServerVariables($attacker)->postJson('/api/feedback', [])->assertStatus(422);
+        }
+
+        $this->withServerVariables($attacker)->postJson('/api/feedback', [])
+            ->assertStatus(429)
+            ->assertHeader('Retry-After');
+
+        // IP lain tidak ikut terblokir.
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.9'])->postJson('/api/feedback', [])->assertStatus(422);
+
+        $this->assertDatabaseCount('feedback_submissions', 0);
+    }
+
     public function test_forgot_password_is_throttled_after_six_requests(): void
     {
         for ($i = 1; $i <= 6; $i++) {

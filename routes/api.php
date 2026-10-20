@@ -22,6 +22,8 @@ Route::post('/complaints', [ComplaintController::class, 'store'])->middleware('t
 
 Route::post('/ppid-requests', [PPIDRequestController::class, 'store'])->middleware('throttle:public-ppid');
 
+Route::post('/feedback', [\App\Http\Controllers\Api\FeedbackController::class, 'store'])->middleware('throttle:public-feedback');
+
 Route::get('/ppid-documents', [PpidDocumentController::class, 'index'])->middleware('throttle:public-read');
 
 Route::get('/officials', [\App\Http\Controllers\Api\OfficialController::class, 'index'])->middleware('throttle:public-read');

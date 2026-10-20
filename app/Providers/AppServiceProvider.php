@@ -44,5 +44,16 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perHour(20)->by('ppid-hour:' . $request->ip()),
             ];
         });
+
+        /*
+         * Kritik & Saran boleh anonim, sehingga batasnya lebih ketat
+         * daripada pengaduan dan PPID.
+         */
+        RateLimiter::for('public-feedback', function (Request $request) {
+            return [
+                Limit::perMinute(3)->by('feedback-min:' . $request->ip()),
+                Limit::perHour(10)->by('feedback-hour:' . $request->ip()),
+            ];
+        });
     }
 }

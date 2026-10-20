@@ -48,4 +48,16 @@ class CorsTest extends SecurityTestCase
 
         $this->assertStringNotContainsString('DELETE', (string) $response->headers->get('Access-Control-Allow-Methods'));
     }
+
+    public function test_preflight_for_feedback_post_is_allowed(): void
+    {
+        $response = $this->call('OPTIONS', '/api/feedback', [], [], [], [
+            'HTTP_ORIGIN' => 'https://jayadigitalintegrate-dev.github.io',
+            'HTTP_ACCESS_CONTROL_REQUEST_METHOD' => 'POST',
+            'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' => 'content-type,accept',
+        ]);
+
+        $response->assertNoContent();
+        $response->assertHeader('Access-Control-Allow-Origin', 'https://jayadigitalintegrate-dev.github.io');
+    }
 }

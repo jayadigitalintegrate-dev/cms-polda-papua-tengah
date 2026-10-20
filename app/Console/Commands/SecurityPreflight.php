@@ -83,11 +83,11 @@ class SecurityPreflight extends Command
         $local = array_filter($origins, fn ($o) => str_contains($o, 'localhost') || str_contains($o, '127.0.0.1'));
         $this->record($local === [], $production, 'CORS', 'Tanpa origin localhost di production', $local === [] ? '-' : implode(', ', $local));
 
-        foreach (['public-read', 'public-complaints', 'public-ppid'] as $limiter) {
+        foreach (['public-read', 'public-complaints', 'public-ppid', 'public-feedback'] as $limiter) {
             $this->record(RateLimiter::limiter($limiter) !== null, true, 'Rate limit', "Limiter {$limiter} terdaftar", RateLimiter::limiter($limiter) ? 'ada' : 'tidak ada');
         }
 
-        foreach (['api/complaints' => 'POST', 'api/ppid-requests' => 'POST', 'api/news' => 'GET', 'forgot-password' => 'POST'] as $uri => $method) {
+        foreach (['api/complaints' => 'POST', 'api/ppid-requests' => 'POST', 'api/feedback' => 'POST', 'api/news' => 'GET', 'forgot-password' => 'POST'] as $uri => $method) {
             $route = collect(Route::getRoutes()->getRoutes())->first(fn ($r) => $r->uri() === $uri && in_array($method, $r->methods(), true));
             $throttled = $route && collect($route->gatherMiddleware())->contains(fn ($m) => is_string($m) && str_starts_with($m, 'throttle:'));
             $this->record($throttled, true, 'Rate limit', "{$method} /{$uri} ber-throttle", $route ? ($throttled ? 'ya' : 'tidak') : 'route tidak ditemukan');
