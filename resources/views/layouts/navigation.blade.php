@@ -185,6 +185,20 @@
 
 
                     {{-- ===================================================== --}}
+                    {{-- KRITIK & SARAN --}}
+                    {{-- ===================================================== --}}
+
+                    @can('view-feedback')
+                        <x-nav-link
+                            :href="route('feedback.index')"
+                            :active="request()->routeIs('feedback.*')"
+                        >
+                            Kritik &amp; Saran
+                        </x-nav-link>
+                    @endcan
+
+
+                    {{-- ===================================================== --}}
                     {{-- PENGUMUMAN --}}
                     {{-- ===================================================== --}}
 
@@ -674,6 +688,16 @@
             >
                 Pengaduan
             </x-responsive-nav-link>
+
+            {{-- Kritik & Saran --}}
+            @can('view-feedback')
+                <x-responsive-nav-link
+                    :href="route('feedback.index')"
+                    :active="request()->routeIs('feedback.*')"
+                >
+                    Kritik &amp; Saran
+                </x-responsive-nav-link>
+            @endcan
 
             {{-- Pengumuman --}}
             <x-responsive-nav-link

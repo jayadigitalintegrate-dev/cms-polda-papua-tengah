@@ -4,6 +4,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\ContactSettingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FeedbackSubmissionController;
 use App\Http\Controllers\GalleryCategoryController;
 use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\HeroController;
@@ -122,6 +123,34 @@ Route::resource('announcements', AnnouncementController::class);
             'index',
             'show',
         ]);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | KRITIK & SARAN
+    |--------------------------------------------------------------------------
+    |
+    | Tanpa hapus massal dan tanpa publikasi testimoni. Melihat dan mengubah
+    | memakai gate terpisah (lihat AppServiceProvider).
+    |
+    */
+
+    Route::resource('kritik-saran', FeedbackSubmissionController::class)
+        ->only([
+            'index',
+            'show',
+        ])
+        ->parameters(['kritik-saran' => 'feedback'])
+        ->names('feedback')
+        ->middleware('can:view-feedback');
+
+    Route::resource('kritik-saran', FeedbackSubmissionController::class)
+        ->only([
+            'update',
+        ])
+        ->parameters(['kritik-saran' => 'feedback'])
+        ->names('feedback')
+        ->middleware('can:update-feedback');
 
 
     /*

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -54,6 +56,21 @@ class AppServiceProvider extends ServiceProvider
                 Limit::perMinute(3)->by('feedback-min:' . $request->ip()),
                 Limit::perHour(10)->by('feedback-hour:' . $request->ip()),
             ];
+        });
+
+        /*
+         * Dashboard Kritik & Saran (berisi identitas opsional pengirim).
+         * Melihat: semua role CMS yang sah, seperti modul Pengaduan/PPID.
+         * Mengubah status/catatan: superadmin dan operator saja. Hak ubah
+         * supervisi belum disahkan (F-07), sehingga sementara dibatasi baca.
+         * Akun dengan role lain ditolak.
+         */
+        Gate::define('view-feedback', function (User $user): bool {
+            return in_array($user->role, ['superadmin', 'operator', 'supervisi'], true);
+        });
+
+        Gate::define('update-feedback', function (User $user): bool {
+            return in_array($user->role, ['superadmin', 'operator'], true);
         });
     }
 }
