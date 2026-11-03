@@ -1,11 +1,11 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-none mx-auto px-4 sm:px-5 lg:px-7">
 
-        <div class="flex justify-between h-16">
+        <div class="flex items-center h-16 gap-4">
 
             <!-- LEFT SIDE -->
-            <div class="flex">
+            <div class="flex flex-1 min-w-0 items-center">
 
                 <!-- Logo / Application Name -->
                 <div class="shrink-0 flex items-center">
@@ -17,7 +17,7 @@
                 </div>
 
                 <!-- Desktop Navigation -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                <div class="hidden sm:-my-px sm:flex sm:flex-1 sm:items-center sm:justify-center sm:gap-2 lg:gap-3 xl:gap-4 whitespace-nowrap" style="justify-content: center;">
 
                     {{-- DASHBOARD --}}
                     <x-nav-link
@@ -446,12 +446,63 @@
 
 
 
+                    {{-- ADMINISTRASI --}}
+                    @if (Auth::user()?->role === 'superadmin')
+                        <x-dropdown align="right" width="56">
+
+                        <x-slot name="trigger">
+                            <button
+                                class="inline-flex items-center px-1 py-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
+                                {{ request()->routeIs('users.*') || request()->routeIs('settings.*')
+                                    ? 'text-gray-900'
+                                    : 'text-gray-500 hover:text-gray-700' }}"
+                            >
+                                <span>Administrasi</span>
+
+                                <svg
+                                    class="ms-1 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+
+                            {{-- Manajemen User --}}
+                            <x-dropdown-link
+                                :href="route('users.index')"
+                            >
+                                Manajemen User
+                            </x-dropdown-link>
+
+                            {{-- Pengaturan --}}
+                            <x-dropdown-link
+                                :href="route('settings.edit')"
+                            >
+                                Pengaturan
+                            </x-dropdown-link>
+
+                        </x-slot>
+
+                        </x-dropdown>
+                    @endif
+
                 </div>
             </div>
 
 
             <!-- RIGHT SIDE / ACCOUNT -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:shrink-0 sm:items-center sm:justify-end">
 
                 <x-dropdown align="right" width="48">
 
@@ -590,65 +641,7 @@
     </div>
 
 
-    <!-- =============================================================== -->
-        <!-- SECONDARY NAVIGATION / ADMINISTRATION -->
-        @if (Auth::user()?->role === 'superadmin')
-            <div class="hidden sm:flex items-center border-t border-gray-100 min-h-10">
-                <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center justify-end">
 
-                        <x-dropdown align="right" width="56">
-
-                        <x-slot name="trigger">
-                            <button
-                                class="inline-flex items-center px-1 py-2 text-sm font-medium leading-5 transition duration-150 ease-in-out
-                                {{ request()->routeIs('users.*') || request()->routeIs('settings.*')
-                                    ? 'text-gray-900'
-                                    : 'text-gray-500 hover:text-gray-700' }}"
-                            >
-                                <span>Administrasi</span>
-
-                                <svg
-                                    class="ms-1 h-4 w-4"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M19 9l-7 7-7-7"
-                                    />
-                                </svg>
-                            </button>
-                        </x-slot>
-
-                        <x-slot name="content">
-
-                            {{-- Manajemen User --}}
-                            <x-dropdown-link
-                                :href="route('users.index')"
-                            >
-                                Manajemen User
-                            </x-dropdown-link>
-
-                            {{-- Pengaturan --}}
-                            <x-dropdown-link
-                                :href="route('settings.edit')"
-                            >
-                                Pengaturan
-                            </x-dropdown-link>
-
-                        </x-slot>
-
-                        </x-dropdown>
-
-                    </div>
-                </div>
-            </div>
-        @endif
 
     <!-- MOBILE NAVIGATION -->
     <!-- =============================================================== -->
