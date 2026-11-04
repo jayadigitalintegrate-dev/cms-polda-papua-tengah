@@ -130,10 +130,14 @@ Route::resource('announcements', AnnouncementController::class);
     | KRITIK & SARAN
     |--------------------------------------------------------------------------
     |
-    | Tanpa hapus massal dan tanpa publikasi testimoni. Melihat dan mengubah
-    | memakai gate terpisah (lihat AppServiceProvider).
+    | Melihat, mengubah, dan menghapus memakai gate terpisah.
+    | Penghapusan permanen hanya untuk superadmin; tanpa publikasi testimoni.
     |
     */
+
+    Route::delete('/kritik-saran/bulk-delete', [FeedbackSubmissionController::class, 'bulkDelete'])
+        ->middleware(['can:delete-feedback', \App\Http\Middleware\RequireFeedbackDeleteCsrfToken::class])
+        ->name('feedback.bulk-delete');
 
     Route::resource('kritik-saran', FeedbackSubmissionController::class)
         ->only([

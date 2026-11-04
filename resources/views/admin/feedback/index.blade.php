@@ -42,6 +42,17 @@
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
+            @if (session('feedback_delete_error'))
+                <div role="alert" class="mb-4 rounded-lg bg-red-100 p-4 text-red-800">{{ session('feedback_delete_error') }}</div>
+            @elseif (session('success'))
+                <div role="status" class="mb-4 rounded-lg bg-green-100 p-4 text-green-800">{{ session('success') }}</div>
+            @endif
+            @if ($errors->any())
+                <div role="alert" class="mb-4 rounded-lg bg-red-100 p-4 text-red-800">
+                    Permintaan tidak valid. Muat ulang daftar dan pilih kembali masukan.
+                </div>
+            @endif
+
             {{-- SEARCH & FILTER --}}
             <div class="bg-white shadow-sm sm:rounded-xl mb-6">
 
@@ -132,7 +143,27 @@
 
 
             {{-- TABLE --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl"
+                x-data="{ selected: [], pageIds: @js(array_map('strval', $feedbacks->modelKeys())) }">
+
+                @can('delete-feedback')
+                    <form id="feedback-bulk-delete" method="POST" action="{{ route('feedback.bulk-delete') }}"
+                        x-on:submit="if (selected.length === 0 || ! window.confirm('Hapus permanen ' + selected.length + ' masukan terpilih? Tindakan ini tidak dapat dibatalkan.')) $event.preventDefault()"
+                        class="border-b border-gray-200 p-4">
+                        @csrf
+                        @method('DELETE')
+                        <input type="hidden" name="page_scope" value="{{ $pageScope }}">
+                        <input type="hidden" name="page" value="{{ $feedbacks->currentPage() }}">
+                        <input type="hidden" name="search" value="{{ $search }}">
+                        <input type="hidden" name="category" value="{{ $category }}">
+                        <input type="hidden" name="status" value="{{ $status }}">
+                        <button type="submit" disabled x-bind:disabled="selected.length === 0"
+                            class="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                            Hapus Terpilih (<span x-text="selected.length">0</span>)
+                        </button>
+                        <p class="mt-2 text-sm text-gray-600">Pilihan hanya berlaku untuk halaman aktif. Penghapusan bersifat permanen.</p>
+                    </form>
+                @endcan
 
                 <div class="overflow-x-auto">
 
@@ -140,6 +171,16 @@
 
                         <thead class="bg-gray-50">
                             <tr>
+                                @can('delete-feedback')
+                                    <th class="px-4 py-3">
+                                        <input type="checkbox" aria-label="Pilih semua masukan di halaman ini"
+                                            x-bind:disabled="pageIds.length === 0"
+                                            x-bind:checked="pageIds.length > 0 && selected.length === pageIds.length"
+                                            x-effect="$el.indeterminate = selected.length > 0 && selected.length < pageIds.length"
+                                            x-on:change="selected = $event.target.checked ? [...pageIds] : []"
+                                            class="rounded border-gray-300">
+                                    </th>
+                                @endcan
                                 <th class="w-40 px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">
                                     Tanggal
                                 </th>
@@ -171,6 +212,15 @@
                                 @endphp
 
                                 <tr class="hover:bg-gray-50">
+
+                                    @can('delete-feedback')
+                                        <td class="px-4 py-4">
+                                            <input type="checkbox" name="ids[]" value="{{ $feedback->id }}"
+                                                form="feedback-bulk-delete" x-model="selected"
+                                                aria-label="Pilih masukan {{ $feedback->id }}"
+                                                class="rounded border-gray-300">
+                                        </td>
+                                    @endcan
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                         {{ $feedback->created_at?->format('d/m/Y H:i') }}
@@ -210,7 +260,7 @@
                             @empty
 
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                    <td colspan="{{ auth()->user()->can('delete-feedback') ? 7 : 6 }}" class="px-6 py-12 text-center text-gray-500">
                                         @if ($search || $category || $status)
                                             Tidak ditemukan masukan yang sesuai dengan pencarian/filter.
                                         @else

@@ -72,5 +72,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('update-feedback', function (User $user): bool {
             return in_array($user->role, ['superadmin', 'operator'], true);
         });
+
+        Gate::define('delete-feedback', fn (User $user): bool => $user->role === 'superadmin');
     }
 }
