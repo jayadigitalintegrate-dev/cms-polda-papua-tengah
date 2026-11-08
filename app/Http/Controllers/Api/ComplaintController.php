@@ -68,7 +68,9 @@ class ComplaintController extends Controller
                     STR_PAD_LEFT
                 );
         } while (
-            Complaint::where('tiket', $ticket)->exists()
+            // The unique index also reserves tickets belonging to soft-deleted reports.
+            // Removing this scope also supports schemas without deleted_at yet.
+            Complaint::withTrashed()->where('tiket', $ticket)->exists()
         );
 
         $complaint = Complaint::create([

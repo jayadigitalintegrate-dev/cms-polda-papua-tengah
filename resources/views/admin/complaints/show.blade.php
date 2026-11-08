@@ -16,7 +16,7 @@
                 href="{{ route('complaints.index') }}"
                 class="inline-flex items-center rounded-lg bg-gray-600 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-700"
             >
-                ? Kembali
+                &#8592; Kembali
             </a>
         </div>
     </x-slot>
@@ -219,6 +219,95 @@
             </div>
 
 
+                        {{-- FORM STATUS PENGADUAN --}}
+            <div class="bg-white shadow-sm sm:rounded-xl overflow-hidden">
+                <div class="border-b border-gray-200 px-6 py-5">
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        Pembaruan Status Pengaduan
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Perbarui status dan catatan tindak lanjut laporan.
+                    </p>
+                </div>
+
+                <div class="px-6 py-6">
+                    @if (!$statusFeatureReady)
+                        <p class="text-sm text-amber-700">
+                            Fitur pembaruan status belum diaktifkan.
+                        </p>
+                    @else
+                        @can('update-complaints')
+                            @if ($errors->any())
+                                <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+                                    <ul class="list-disc pl-5">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            @if (session('success'))
+                                <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            <form method="POST"
+                                  action="{{ route('complaints.update-status', $complaint) }}"
+                                  class="space-y-5">
+                                @csrf
+                                @method('PATCH')
+
+                                <div>
+                                    <label for="status" class="block text-sm font-medium text-gray-700">
+                                        Status Pengaduan
+                                    </label>
+                                    <select id="status" name="status" required
+                                            class="mt-2 block w-full rounded-lg border-gray-300">
+                                        @foreach ([
+                                            'diterima' => 'Diterima',
+                                            'diverifikasi' => 'Diverifikasi',
+                                            'diproses' => 'Diproses',
+                                            'dikerjakan' => 'Dikerjakan',
+                                            'selesai' => 'Selesai / Done',
+                                            'ditolak' => 'Ditolak',
+                                        ] as $value => $label)
+                                            <option value="{{ $value }}"
+                                                @selected(old('status', $complaint->status) === $value)>
+                                                {{ $label }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="catatan_admin"
+                                           class="block text-sm font-medium text-gray-700">
+                                        Catatan Tindak Lanjut
+                                    </label>
+                                    <textarea id="catatan_admin"
+                                              name="catatan_admin"
+                                              rows="4"
+                                              maxlength="5000"
+                                              required
+                                              class="mt-2 block w-full rounded-lg border-gray-300"
+                                              placeholder="Tuliskan tindakan yang dilakukan...">{{ old('catatan_admin', '') }}</textarea>
+                                </div>
+
+                                <button type="submit"
+                                        class="rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700">
+                                    Simpan Perubahan Status
+                                </button>
+                            </form>
+                        @else
+                            <p class="text-sm text-gray-500">
+                                Akun ini hanya memiliki akses melihat pengaduan.
+                            </p>
+                        @endcan
+                    @endif
+                </div>
+            </div>
             {{-- CATATAN ADMIN --}}
             <div class="bg-white shadow-sm sm:rounded-xl overflow-hidden">
 
@@ -293,6 +382,42 @@
             </div>
 
 
+                        {{-- RIWAYAT STATUS PENGADUAN --}}
+            @if ($statusFeatureReady)
+                <div class="bg-white shadow-sm sm:rounded-xl overflow-hidden">
+                    <div class="border-b border-gray-200 px-6 py-5">
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            Riwayat Perubahan Status
+                        </h2>
+                    </div>
+
+                    <div class="px-6 py-6 space-y-4">
+                        @forelse ($statusHistories as $history)
+                            <div class="rounded-lg border border-gray-200 p-4">
+                                <p class="font-semibold text-gray-900">
+                                    {{ ucfirst($history->old_status) }}
+                                    &rarr;
+                                    {{ ucfirst($history->new_status) }}
+                                </p>
+
+                                <p class="mt-2 text-sm text-gray-600 whitespace-pre-line">
+                                    {{ $history->note }}
+                                </p>
+
+                                <p class="mt-3 text-xs text-gray-500">
+                                    Petugas: {{ $history->actor?->name ?? 'Akun tidak tersedia' }}
+                                    |
+                                    {{ $history->created_at?->format('d/m/Y H:i') }}
+                                </p>
+                            </div>
+                        @empty
+                            <p class="text-sm text-gray-500">
+                                Belum ada riwayat perubahan status.
+                            </p>
+                        @endforelse
+                    </div>
+                </div>
+            @endif
             {{-- TOMBOL --}}
             <div class="flex flex-col sm:flex-row justify-between gap-3">
 
@@ -300,7 +425,7 @@
                     href="{{ route('complaints.index') }}"
                     class="inline-flex justify-center items-center rounded-lg bg-gray-600 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-700"
                 >
-                    ? Kembali ke Pengaduan
+                    &#8592; Kembali ke Pengaduan
                 </a>
 
             </div>

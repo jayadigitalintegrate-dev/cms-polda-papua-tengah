@@ -26,6 +26,30 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div role="alert" class="mb-5 rounded-lg bg-red-100 border border-red-200 px-4 py-3 text-red-800">
+                    <ul class="list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @can('delete-complaints')
+                @if ($deletionFeatureReady)
+                    <form id="complaint-bulk-delete" method="POST" action="{{ route('complaints.bulk-delete') }}" class="mb-5 rounded-xl bg-white p-5 shadow-sm">
+                        @csrf
+                        <p id="complaint-selection-count" aria-live="polite" class="mb-3 text-sm text-gray-700">0 pengaduan dipilih</p>
+                        <p class="mt-2 text-sm text-gray-500">Maksimal 15 pengaduan pada halaman ini. Riwayat pengaduan tetap disimpan.</p>
+                        <button id="complaint-delete-selected" type="submit" disabled class="mt-3 inline-flex rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">Hapus Terpilih</button>
+                        <noscript><p class="mt-2 text-sm text-gray-600">Aktifkan JavaScript untuk memilih dan menghapus pengaduan.</p></noscript>
+                    </form>
+                @else
+                    <p role="status" class="mb-5 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">Fitur penghapusan pengaduan belum tersedia.</p>
+                @endif
+            @endcan
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-xl">
 
                 <div class="overflow-x-auto">
@@ -33,6 +57,13 @@
 
                         <thead class="bg-gray-50">
                             <tr>
+                                @can('delete-complaints')
+                                    @if ($deletionFeatureReady)
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600">
+                                            <label class="inline-flex items-center gap-2 whitespace-nowrap"><input id="complaint-select-all" type="checkbox" form="complaint-bulk-delete" class="rounded border-gray-300"> Pilih Semua</label>
+                                        </th>
+                                    @endif
+                                @endcan
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">
                                     Tiket
                                 </th>
@@ -64,6 +95,13 @@
                             @forelse ($complaints as $complaint)
 
                                 <tr class="hover:bg-gray-50">
+                                    @can('delete-complaints')
+                                        @if ($deletionFeatureReady)
+                                            <td class="px-6 py-4">
+                                                <input type="checkbox" name="ids[]" value="{{ $complaint->id }}" form="complaint-bulk-delete" data-complaint-selection aria-label="Pilih pengaduan {{ $complaint->tiket }}" class="rounded border-gray-300">
+                                            </td>
+                                        @endif
+                                    @endcan
 
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="font-semibold text-gray-900">
@@ -140,7 +178,7 @@
 
                                 <tr>
                                     <td
-                                        colspan="6"
+                                        colspan="{{ $deletionFeatureReady && auth()->user()->can('delete-complaints') ? 7 : 6 }}"
                                         class="px-6 py-12 text-center text-gray-500"
                                     >
                                         Belum ada pengaduan yang masuk.
@@ -164,4 +202,43 @@
 
         </div>
     </div>
+    @can('delete-complaints')
+        @if ($deletionFeatureReady)
+            <script>
+                (() => {
+                    const form = document.getElementById('complaint-bulk-delete');
+                    const rows = Array.from(document.querySelectorAll('[data-complaint-selection]'));
+                    const selectAll = document.getElementById('complaint-select-all');
+                    const count = document.getElementById('complaint-selection-count');
+                    const submit = document.getElementById('complaint-delete-selected');
+                    const selectedCount = () => rows.filter(row => row.checked).length;
+                    const update = () => {
+                        const selected = selectedCount();
+                        count.textContent = `${selected} pengaduan dipilih`;
+                        submit.disabled = selected === 0 || selected > 15;
+                        selectAll.disabled = rows.length === 0;
+                        selectAll.checked = rows.length > 0 && selected === rows.length;
+                        selectAll.indeterminate = selected > 0 && selected < rows.length;
+                    };
+                    selectAll.addEventListener('change', () => {
+                        rows.forEach(row => { row.checked = selectAll.checked; });
+                        update();
+                    });
+                    rows.forEach(row => row.addEventListener('change', update));
+                    form.addEventListener('submit', event => {
+                        const selected = selectedCount();
+                        if (selected === 0 || selected > 15) {
+                            event.preventDefault();
+                            return;
+                        }
+                        if (!window.confirm(`Hapus ${selected} pengaduan terpilih secara lunak? Riwayat tetap disimpan.`)) {
+                            event.preventDefault();
+                        }
+                    });
+                    window.addEventListener('pageshow', update);
+                    update();
+                })();
+            </script>
+        @endif
+    @endcan
 </x-app-layout>

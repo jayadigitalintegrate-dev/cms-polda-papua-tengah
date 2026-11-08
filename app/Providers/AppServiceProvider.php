@@ -74,5 +74,20 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Gate::define('delete-feedback', fn (User $user): bool => $user->role === 'superadmin');
+        /*
+         * Hak akses modul Pengaduan Masyarakat.
+         * Supervisi hanya membaca; penghapusan khusus superadmin.
+         */
+        Gate::define('view-complaints', function (User $user): bool {
+            return in_array($user->role, ['superadmin', 'operator', 'supervisi'], true);
+        });
+
+        Gate::define('update-complaints', function (User $user): bool {
+            return in_array($user->role, ['superadmin', 'operator'], true);
+        });
+
+        Gate::define('delete-complaints', function (User $user): bool {
+            return $user->role === 'superadmin';
+        });
     }
 }

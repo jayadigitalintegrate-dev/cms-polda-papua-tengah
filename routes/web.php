@@ -118,11 +118,24 @@ Route::resource('announcements', AnnouncementController::class);
     |--------------------------------------------------------------------------
     */
 
+    Route::post(
+        'complaints/bulk-delete',
+        [ComplaintController::class, 'bulkDelete']
+    )
+        ->middleware('can:delete-complaints')
+        ->name('complaints.bulk-delete');
+    Route::patch(
+        'complaints/{complaint}/status',
+        [ComplaintController::class, 'updateStatus']
+    )
+        ->middleware('can:update-complaints')
+        ->name('complaints.update-status');
     Route::resource('complaints', ComplaintController::class)
         ->only([
             'index',
             'show',
-        ]);
+        ])
+        ->middleware('can:view-complaints');
 
 
     /*
