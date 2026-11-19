@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\NewsEngagementController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\Api\PPIDRequestController;
 use App\Http\Controllers\Api\PpidDocumentController;
@@ -9,6 +10,8 @@ use App\Http\Controllers\Api\HeroController;
 use App\Http\Controllers\Api\AnnouncementController;
 
 Route::get('/news', [NewsController::class, 'index'])->middleware('throttle:public-read');
+Route::post('/news/{slug}/view', [NewsEngagementController::class, 'view'])->middleware('throttle:news-engagement-view');
+Route::post('/news/{slug}/like', [NewsEngagementController::class, 'like'])->middleware('throttle:news-engagement-like');
 
 Route::get('/announcement-popup', [NewsController::class, 'popup'])->middleware('throttle:public-read');
 

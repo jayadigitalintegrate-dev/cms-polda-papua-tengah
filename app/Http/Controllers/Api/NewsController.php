@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\News;
+use Illuminate\Support\Facades\DB;
 
 class NewsController extends Controller
 {
@@ -38,8 +39,22 @@ class NewsController extends Controller
                 'sort_order',
                 'published_at',
                 'created_at',
-            ])
-            ->map(function (News $item) {
+            ]);
+
+        // Two grouped queries, instead of per-news COUNT queries (N+1).
+        $ids = $news->pluck('id')->all();
+        $views = $ids
+            ? DB::table('news_views')->whereIn('news_id', $ids)
+                ->select('news_id')->selectRaw('COUNT(*) as total')
+                ->groupBy('news_id')->pluck('total', 'news_id')
+            : collect();
+        $likes = $ids
+            ? DB::table('news_likes')->whereIn('news_id', $ids)
+                ->select('news_id')->selectRaw('COUNT(*) as total')
+                ->groupBy('news_id')->pluck('total', 'news_id')
+            : collect();
+
+        $news = $news->map(function (News $item) use ($views, $likes) {
                 return [
                     'id' => $item->id,
                     'title' => $item->title,
@@ -64,6 +79,8 @@ class NewsController extends Controller
 
                     'featured' => (bool) $item->featured,
                     'sort_order' => (int) $item->sort_order,
+                    'views' => (int) ($views[$item->id] ?? 0),
+                    'likes' => (int) ($likes[$item->id] ?? 0),
 
                     'published_at' => $item->published_at,
                     'created_at' => $item->created_at,
