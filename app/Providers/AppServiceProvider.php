@@ -33,6 +33,21 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(300)->by($request->ip());
         });
 
+        // Engagement is public but write-limited per IP (including shared NAT offices).
+        RateLimiter::for('news-engagement-view', function (Request $request) {
+            return [
+                Limit::perMinute(120)->by('news-view-minute:' . $request->ip()),
+                Limit::perHour(1200)->by('news-view-hour:' . $request->ip()),
+            ];
+        });
+
+        RateLimiter::for('news-engagement-like', function (Request $request) {
+            return [
+                Limit::perMinute(30)->by('news-like-minute:' . $request->ip()),
+                Limit::perHour(200)->by('news-like-hour:' . $request->ip()),
+            ];
+        });
+
         RateLimiter::for('public-complaints', function (Request $request) {
             return [
                 Limit::perMinute(5)->by('complaints-min:' . $request->ip()),
